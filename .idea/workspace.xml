@@ -5,8 +5,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="ff4df2ca-b686-456c-aeec-d0ddc05bb034" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/cmd/app/app.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/internal/film_lib/main.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/docs/db/ER.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -51,7 +51,7 @@
     "node.js.detected.package.eslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
     "nodejs_package_manager_path": "npm",
-    "settings.editor.selected.configurable": "go.autoimport"
+    "settings.editor.selected.configurable": "preferences.pluginManager"
   }
 }]]></component>
   <component name="RunManager">
