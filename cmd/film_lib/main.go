@@ -1,6 +1,6 @@
 package main
 
-import "github.com/ellexo2456/FilmLib/cmd/app"
+import "github.com/ellexo2456/FilmLib/internal/app"
 
 //	@title			FilmLib API
 //	@version		1.0
