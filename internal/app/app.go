@@ -49,9 +49,9 @@ func StartServer() {
 
 	auth_http.NewAuthHandler(authMux, au)
 	film_http.NewFilmHandler(apiMux, fu)
-	mux.HandleFunc("GET /swagger/*", httpSwagger.WrapHandler)
+	mux.HandleFunc("/swagger/*", httpSwagger.WrapHandler)
 
-	mw := middleware.New(au)
+	mw := middleware.NewAuth(au)
 
 	mux.Handle("/api/v1/auth/", http.StripPrefix("/api/v1/auth", authMux))
 	mux.Handle("/api/v1/", http.StripPrefix("/api/v1", mw.IsAuth(apiMux)))

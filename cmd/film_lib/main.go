@@ -12,7 +12,7 @@ import "github.com/ellexo2456/FilmLib/internal/app"
 
 //	@license.name	AS IS (NO WARRANTY)
 
-// @host		127.0.0.1
+// @host		localhost:3000
 // @schemes	http
 // @BasePath	/
 func main() {

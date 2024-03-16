@@ -11,7 +11,7 @@ definitions:
     type: object
   domain.Film:
     type: object
-host: 127.0.0.1
+host: localhost:3000
 info:
   contact:
     email: ax.chinaev@yandex.ru

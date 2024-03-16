@@ -3,19 +3,20 @@ package middleware
 import (
 	"errors"
 	"github.com/ellexo2456/FilmLib/internal/domain"
+	"golang.org/x/net/context"
 	"net/http"
 	"time"
 )
 
-type Middleware struct {
+type AuthMiddleware struct {
 	authUsecase domain.AuthUsecase
 }
 
-func New(au domain.AuthUsecase) *Middleware {
-	return &Middleware{authUsecase: au}
+func NewAuth(au domain.AuthUsecase) *AuthMiddleware {
+	return &AuthMiddleware{authUsecase: au}
 }
 
-func (m *Middleware) IsAuth(next http.Handler) http.Handler {
+func (m *AuthMiddleware) IsAuth(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		c, err := r.Cookie("session_token")
 		if err != nil {
@@ -32,16 +33,17 @@ func (m *Middleware) IsAuth(next http.Handler) http.Handler {
 		}
 
 		sessionToken := c.Value
-		exists, err := m.authUsecase.IsAuth(sessionToken)
+		sc, err := m.authUsecase.RetrieveSessionContext(sessionToken)
 		if err != nil {
 			domain.WriteError(w, err.Error(), domain.GetStatusCode(err))
 			return
 		}
-		if !exists {
-			domain.WriteError(w, domain.ErrUnauthorized.Error(), http.StatusUnauthorized)
+		if sc.UserID == 0 {
+			domain.WriteError(w, "You`re unauthorized", http.StatusUnauthorized)
 			return
 		}
 
-		next.ServeHTTP(w, r)
+		ctx := context.WithValue(r.Context(), domain.SessionContextKey, sc)
+		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }

@@ -11,14 +11,14 @@ import (
 )
 
 const getByEmailQuery = `
-	SELECT id, email, password
+	SELECT id, email, password, role
 	FROM "user"
 	WHERE email = $1
 `
 
 const addUserQuery = `
-	INSERT INTO "user" (password, email)
-	VALUES ($1, $2)
+	INSERT INTO "user" (password, email, role)
+	VALUES ($1, $2, $3)
 	RETURNING id
 `
 
@@ -50,6 +50,7 @@ func (r *authPostgresqlRepository) GetByEmail(email string) (domain.User, error)
 		&user.ID,
 		&user.Email,
 		&user.Password,
+		&user.Role,
 	)
 
 	if errors.Is(err, pgx.ErrNoRows) {
@@ -72,6 +73,7 @@ func (r *authPostgresqlRepository) AddUser(user domain.User) (int, error) {
 	result := r.db.QueryRow(r.ctx, addUserQuery,
 		user.Password,
 		user.Email,
+		user.Role,
 	)
 
 	logs.Logger.Debug("AddUser queryRow result:", result)

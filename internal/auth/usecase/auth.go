@@ -40,6 +40,7 @@ func (u *authUsecase) Login(credentials domain.Credentials) (domain.Session, int
 		Token:     uuid.NewString(),
 		ExpiresAt: time.Now().Add(24 * time.Hour),
 		UserID:    expectedUser.ID,
+		Role:      expectedUser.Role,
 	}
 	if err = u.sessionRepo.Add(session); err != nil {
 		return domain.Session{}, 0, err
@@ -77,6 +78,7 @@ func (u *authUsecase) Register(user domain.User) (int, error) {
 	rand.Read(salt)
 	user.Password = HashPassword(salt, user.Password)
 
+	user.Role = domain.Usr
 	id, err := u.authRepo.AddUser(user)
 	if err != nil {
 		return 0, err
@@ -86,15 +88,15 @@ func (u *authUsecase) Register(user domain.User) (int, error) {
 
 }
 
-func (u *authUsecase) IsAuth(token string) (bool, error) {
+func (u *authUsecase) RetrieveSessionContext(token string) (domain.SessionContext, error) {
 	if token == "" {
-		return false, domain.ErrInvalidToken
+		return domain.SessionContext{}, domain.ErrInvalidToken
 	}
 
-	auth, err := u.sessionRepo.SessionExists(token)
-	logs.Logger.Debug("Usecase IsAuth auth: ", auth)
+	auth, err := u.sessionRepo.GetSessionContext(token)
+	logs.Logger.Debug("Usecase/auth RetrieveSessionContext : ", auth)
 	if err != nil {
-		return false, err
+		return domain.SessionContext{}, err
 	}
 
 	return auth, nil

@@ -2,6 +2,8 @@ package redis
 
 import (
 	"context"
+	"encoding/json"
+	"errors"
 	"time"
 
 	"github.com/redis/go-redis/v9"
@@ -22,12 +24,19 @@ func (s *sessionRedisRepository) Add(session domain.Session) error {
 		return domain.ErrInvalidToken
 	}
 
+	jsonData, err := json.Marshal(domain.SessionContext{
+		UserID: session.UserID,
+		Role:   session.Role,
+	})
+	if err != nil {
+		return domain.ErrInvalidToken
+	}
+
 	duration := session.ExpiresAt.Sub(time.Now())
-	err := s.client.Set(context.TODO(), session.Token, session.UserID, duration).Err()
+	err = s.client.Set(context.TODO(), session.Token, jsonData, duration).Err()
 	if err != nil {
 		return err
 	}
-
 	return nil
 }
 
@@ -44,15 +53,24 @@ func (s *sessionRedisRepository) DeleteByToken(token string) error {
 	return nil
 }
 
-func (s *sessionRedisRepository) SessionExists(token string) (bool, error) {
+func (s *sessionRedisRepository) GetSessionContext(token string) (domain.SessionContext, error) {
 	if token == "" {
-		return false, domain.ErrInvalidToken
+		return domain.SessionContext{}, domain.ErrInvalidToken
 	}
 
-	exists, err := s.client.Exists(context.Background(), token).Result()
+	r, err := s.client.Get(context.Background(), token).Result()
 	if err != nil {
-		return false, err
+		if errors.Is(err, redis.Nil) {
+			return domain.SessionContext{}, domain.ErrNotFound
+		}
+		return domain.SessionContext{}, err
 	}
 
-	return exists == 1, nil
+	var sc domain.SessionContext
+	err = json.Unmarshal([]byte(r), &sc)
+	if err != nil {
+		return domain.SessionContext{}, err
+	}
+
+	return sc, nil
 }
