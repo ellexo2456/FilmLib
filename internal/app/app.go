@@ -9,14 +9,18 @@ import (
 	"github.com/joho/godotenv"
 	"github.com/swaggo/http-swagger"
 
-	auth_http "github.com/ellexo2456/FilmLib/internal/auth/delivery/http"
-	auth_postgres "github.com/ellexo2456/FilmLib/internal/auth/repository/postgresql"
-	auth_redis "github.com/ellexo2456/FilmLib/internal/auth/repository/redis"
-	auth_usecase "github.com/ellexo2456/FilmLib/internal/auth/usecase"
+	authhttp "github.com/ellexo2456/FilmLib/internal/auth/delivery/http"
+	authpostgres "github.com/ellexo2456/FilmLib/internal/auth/repository/postgresql"
+	authredis "github.com/ellexo2456/FilmLib/internal/auth/repository/redis"
+	authusecase "github.com/ellexo2456/FilmLib/internal/auth/usecase"
 
-	film_http "github.com/ellexo2456/FilmLib/internal/film/delivery/http"
-	film_postgres "github.com/ellexo2456/FilmLib/internal/film/repository/postgresql"
-	film_usecase "github.com/ellexo2456/FilmLib/internal/film/usecase"
+	filmshttp "github.com/ellexo2456/FilmLib/internal/films/delivery/http"
+	filmspostgres "github.com/ellexo2456/FilmLib/internal/films/repository/postgresql"
+	filmsusecase "github.com/ellexo2456/FilmLib/internal/films/usecase"
+
+	actorshttp "github.com/ellexo2456/FilmLib/internal/actors/delivery/http"
+	actorspostgres "github.com/ellexo2456/FilmLib/internal/actors/repository/postgresql"
+	actorsusecase "github.com/ellexo2456/FilmLib/internal/actors/usecase"
 
 	_ "github.com/ellexo2456/FilmLib/docs"
 	"github.com/ellexo2456/FilmLib/internal/connectors/postgres"
@@ -37,18 +41,21 @@ func StartServer() {
 	rc := redis.Connect()
 	defer rc.Close()
 
-	sr := auth_redis.NewSessionRedisRepository(rc)
-	ar := auth_postgres.NewAuthPostgresqlRepository(pc, ctx)
-	fr := film_postgres.NewFilmPostgresqlRepository(pc, ctx)
+	sr := authredis.NewSessionRedisRepository(rc)
+	ar := authpostgres.NewAuthPostgresqlRepository(pc, ctx)
+	acr := actorspostgres.NewActorsPostgresqlRepository(pc, ctx)
+	fr := filmspostgres.NewFilmsPostgresqlRepository(pc, ctx)
 
-	au := auth_usecase.NewAuthUsecase(ar, sr)
-	fu := film_usecase.NewFilmUsecase(fr)
+	au := authusecase.NewAuthUsecase(ar, sr)
+	acu := actorsusecase.NewActorsUsecase(acr)
+	fu := filmsusecase.NewFilmsUsecase(fr)
 
 	authMux := http.NewServeMux()
 	apiMux := http.NewServeMux()
 
-	auth_http.NewAuthHandler(authMux, au)
-	film_http.NewFilmHandler(apiMux, fu)
+	authhttp.NewAuthHandler(authMux, au)
+	actorshttp.NewActorsHandler(apiMux, acu)
+	filmshttp.NewFilmHandler(apiMux, fu)
 	mux.HandleFunc("/swagger/*", httpSwagger.WrapHandler)
 
 	mw := middleware.NewAuth(au)

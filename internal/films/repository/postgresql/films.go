@@ -19,7 +19,7 @@ type filmsPostgresqlRepository struct {
 	ctx context.Context
 }
 
-func NewFilmPostgresqlRepository(pool domain.PgxPoolIface, ctx context.Context) domain.FilmRepository {
+func NewFilmsPostgresqlRepository(pool domain.PgxPoolIface, ctx context.Context) domain.FilmsRepository {
 	return &filmsPostgresqlRepository{
 		db:  pool,
 		ctx: ctx,
@@ -35,7 +35,7 @@ func (r *filmsPostgresqlRepository) Insert(film domain.Film) (int, error) {
 	)
 
 	if err != nil {
-		logs.LogError(logs.Logger, "film/postgres", "Insert", err, err.Error())
+		logs.LogError(logs.Logger, "films/postgres", "Insert", err, err.Error())
 		return 0, err
 	}
 	return id, nil

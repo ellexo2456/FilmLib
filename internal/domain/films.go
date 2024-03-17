@@ -10,10 +10,10 @@ type Film struct {
 	Rating      float64     `json:"rating"`
 }
 
-type FilmRepository interface {
+type FilmsRepository interface {
 	Insert(film Film) (int, error)
 }
 
-type FilmUsecase interface {
+type FilmsUsecase interface {
 	Add(film Film) (int, error)
 }

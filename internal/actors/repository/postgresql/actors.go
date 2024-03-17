@@ -49,19 +49,19 @@ const selectAllQuery = `
     	
 `
 
-type actorPostgresqlRepository struct {
+type actorsPostgresqlRepository struct {
 	db  domain.PgxPoolIface
 	ctx context.Context
 }
 
-func NewActorPostgresqlRepository(pool domain.PgxPoolIface, ctx context.Context) domain.ActorRepository {
-	return &actorPostgresqlRepository{
+func NewActorsPostgresqlRepository(pool domain.PgxPoolIface, ctx context.Context) domain.ActorsRepository {
+	return &actorsPostgresqlRepository{
 		db:  pool,
 		ctx: ctx,
 	}
 }
 
-func (r *actorPostgresqlRepository) Insert(actor domain.Actor) (int, error) {
+func (r *actorsPostgresqlRepository) Insert(actor domain.Actor) (int, error) {
 	row := r.db.QueryRow(r.ctx, insertQuery, actor.Name, actor.Sex, actor.Birthdate)
 
 	var id int
@@ -70,28 +70,28 @@ func (r *actorPostgresqlRepository) Insert(actor domain.Actor) (int, error) {
 	)
 
 	if err != nil {
-		logs.LogError(logs.Logger, "actor/postgres", "Insert", err, err.Error())
+		logs.LogError(logs.Logger, "actors/postgres", "Insert", err, err.Error())
 		return 0, err
 	}
 	return id, nil
 }
 
-func (r *actorPostgresqlRepository) Delete(id int) error {
+func (r *actorsPostgresqlRepository) Delete(id int) error {
 	res, err := r.db.Exec(r.ctx, deleteQuery, id)
 	if err != nil {
-		logs.LogError(logs.Logger, "actor/postgres", "Delete", err, err.Error())
+		logs.LogError(logs.Logger, "actors/postgres", "Delete", err, err.Error())
 		return err
 	}
 
 	if res.RowsAffected() == 0 {
-		logs.LogError(logs.Logger, "actor/postgres", "Delete", domain.ErrOutOfRange, domain.ErrOutOfRange.Error())
+		logs.LogError(logs.Logger, "actors/postgres", "Delete", domain.ErrOutOfRange, domain.ErrOutOfRange.Error())
 		return domain.ErrOutOfRange
 	}
 
 	return nil
 }
 
-func (r *actorPostgresqlRepository) Update(actor domain.Actor) (domain.Actor, error) {
+func (r *actorsPostgresqlRepository) Update(actor domain.Actor) (domain.Actor, error) {
 	row := r.db.QueryRow(r.ctx, updateQuery, actor.Name, actor.Sex, actor.Birthdate)
 
 	err := row.Scan(
@@ -101,18 +101,18 @@ func (r *actorPostgresqlRepository) Update(actor domain.Actor) (domain.Actor, er
 		&actor.Birthdate,
 	)
 	if errors.Is(err, pgx.ErrNoRows) {
-		logs.LogError(logs.Logger, "actor/postgres", "Update", err, err.Error())
+		logs.LogError(logs.Logger, "actors/postgres", "Update", err, err.Error())
 		return domain.Actor{}, domain.ErrNotFound
 	}
 	if err != nil {
-		logs.LogError(logs.Logger, "actor/postgres", "Update", err, err.Error())
+		logs.LogError(logs.Logger, "actors/postgres", "Update", err, err.Error())
 		return domain.Actor{}, err
 	}
 
 	return actor, nil
 }
 
-func (r *actorPostgresqlRepository) SelectById(id int) (domain.Actor, error) {
+func (r *actorsPostgresqlRepository) SelectById(id int) (domain.Actor, error) {
 	row := r.db.QueryRow(r.ctx, selectByIdQuery, id)
 
 	var actor domain.Actor
@@ -123,21 +123,21 @@ func (r *actorPostgresqlRepository) SelectById(id int) (domain.Actor, error) {
 		&actor.Birthdate,
 	)
 	if errors.Is(err, pgx.ErrNoRows) {
-		logs.LogError(logs.Logger, "actor/postgres", "SelectById", err, err.Error())
+		logs.LogError(logs.Logger, "actors/postgres", "SelectById", err, err.Error())
 		return domain.Actor{}, domain.ErrNotFound
 	}
 	if err != nil {
-		logs.LogError(logs.Logger, "actor/postgres", "SelectById", err, err.Error())
+		logs.LogError(logs.Logger, "actors/postgres", "SelectById", err, err.Error())
 		return domain.Actor{}, err
 	}
 
 	return actor, nil
 }
 
-func (r *actorPostgresqlRepository) SelectAll() ([]domain.Actor, error) {
+func (r *actorsPostgresqlRepository) SelectAll() ([]domain.Actor, error) {
 	rows, err := r.db.Query(r.ctx, selectAllQuery)
 	if err != nil {
-		logs.LogError(logs.Logger, "actor/postgres", "SelectAll", err, err.Error())
+		logs.LogError(logs.Logger, "actors/postgres", "SelectAll", err, err.Error())
 		return nil, err
 	}
 	defer rows.Close()

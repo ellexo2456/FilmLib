@@ -8,16 +8,16 @@ import (
 	"net/http"
 )
 
-type FilmHandler struct {
-	FilmUsecase domain.FilmUsecase
+type FilmsHandler struct {
+	FilmsUsecase domain.FilmsUsecase
 }
 
-func NewFilmHandler(mux *http.ServeMux, fu domain.FilmUsecase) {
-	handler := &FilmHandler{
-		FilmUsecase: fu,
+func NewFilmHandler(mux *http.ServeMux, fu domain.FilmsUsecase) {
+	handler := &FilmsHandler{
+		FilmsUsecase: fu,
 	}
 
-	mux.HandleFunc("POST /film", handler.AddFilm)
+	mux.HandleFunc("POST /films", handler.AddFilm)
 
 }
 
@@ -32,19 +32,19 @@ func NewFilmHandler(mux *http.ServeMux, fu domain.FilmUsecase) {
 //	@Failure		400		{json}	object{err=string}
 //	@Failure		404		{json}	object{err=string}
 //	@Failure		500		{json}	object{err=string}
-//	@Router			/api/v1/film [post]
-func (h *FilmHandler) AddFilm(w http.ResponseWriter, r *http.Request) {
+//	@Router			/api/v1/films [post]
+func (h *FilmsHandler) AddFilm(w http.ResponseWriter, r *http.Request) {
 	// TODO добавить список актёров
 	sc, ok := r.Context().Value(domain.SessionContextKey).(domain.SessionContext)
 	if !ok {
 		domain.WriteError(w, "can`t find user", http.StatusInternalServerError)
-		logs.LogError(logs.Logger, "film/http", "AddFilm", errors.New("can`t find user"), "can`t find user")
+		logs.LogError(logs.Logger, "films/http", "AddFilm", errors.New("can`t find user"), "can`t find user")
 	}
 	logs.Logger.Debug("AddFilm session context\n: ", sc)
 
 	if sc.Role != domain.Moder {
 		domain.WriteError(w, "forbidden", http.StatusForbidden)
-		logs.LogError(logs.Logger, "film/http", "AddFilm", errors.New("forbidden"), "invalid role")
+		logs.LogError(logs.Logger, "films/http", "AddFilm", errors.New("forbidden"), "invalid role")
 	}
 
 	var film domain.Film
@@ -52,16 +52,16 @@ func (h *FilmHandler) AddFilm(w http.ResponseWriter, r *http.Request) {
 	err := json.NewDecoder(r.Body).Decode(&film)
 	if err != nil {
 		domain.WriteError(w, err.Error(), http.StatusBadRequest)
-		logs.LogError(logs.Logger, "film/http", "AddFilm", err, err.Error())
+		logs.LogError(logs.Logger, "films/http", "AddFilm", err, err.Error())
 		return
 	}
 	logs.Logger.Debug("AddFilm film:\n", film)
-	defer domain.CloseAndAlert(r.Body, "film/http", "AddFilm")
+	defer domain.CloseAndAlert(r.Body, "films/http", "AddFilm")
 
-	id, err := h.FilmUsecase.Add(film)
+	id, err := h.FilmsUsecase.Add(film)
 	if err != nil {
 		domain.WriteError(w, err.Error(), domain.GetStatusCode(err))
-		logs.LogError(logs.Logger, "film/http", "AddFilm", err, err.Error())
+		logs.LogError(logs.Logger, "films/http", "AddFilm", err, err.Error())
 		return
 	}
 

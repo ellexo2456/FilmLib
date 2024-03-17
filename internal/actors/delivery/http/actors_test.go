@@ -78,8 +78,8 @@ func TestGetMoviesByGenre(t *testing.T) {
 
 			NewFilmsHandler(router, mockUsecase)
 
-			handler := &ActorHandler{
-				ActorUsecase: mockUsecase,
+			handler := &ActorsHandler{
+				ActorsUsecase: mockUsecase,
 			}
 
 			router.HandleFunc("/api/v1/film/genre/{id}", handler.GetFilmsByGenre).Methods("GET")
@@ -139,8 +139,8 @@ func TestGetFilmData(t *testing.T) {
 
 			NewFilmsHandler(router, mockUsecase)
 
-			handler := &ActorHandler{
-				ActorUsecase: mockUsecase,
+			handler := &ActorsHandler{
+				ActorsUsecase: mockUsecase,
 			}
 
 			router.HandleFunc("/api/v1/film/{id}", handler.GetFilmData).Methods("GET")
@@ -200,8 +200,8 @@ func TestGetCastPage(t *testing.T) {
 
 			NewFilmsHandler(router, mockUsecase)
 
-			handler := &ActorHandler{
-				ActorUsecase: mockUsecase,
+			handler := &ActorsHandler{
+				ActorsUsecase: mockUsecase,
 			}
 
 			router.HandleFunc("/api/v1/film/cast/{id}", handler.GetCastPage).Methods("GET")

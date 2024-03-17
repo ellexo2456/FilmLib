@@ -17,7 +17,7 @@ type Actor struct {
 	Films     []Film      `json:"films,omitempty"`
 }
 
-type ActorRepository interface {
+type ActorsRepository interface {
 	Insert(actor Actor) (int, error)
 	Delete(id int) error
 	Update(actor Actor) (Actor, error)
@@ -25,7 +25,7 @@ type ActorRepository interface {
 	SelectAll() ([]Actor, error)
 }
 
-type ActorUsecase interface {
+type ActorsUsecase interface {
 	Add(actor Actor) (int, error)
 	Remove(id int) error
 	Modify(actor Actor) (Actor, error)
