@@ -7,8 +7,8 @@ import (
 type Role int
 
 const (
-	Usr   Role = iota // 0
-	Moder             // 2
+	Usr Role = iota
+	Moder
 )
 
 type Key string

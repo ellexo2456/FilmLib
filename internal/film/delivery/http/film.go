@@ -34,6 +34,7 @@ func NewFilmHandler(mux *http.ServeMux, fu domain.FilmUsecase) {
 //	@Failure		500		{json}	object{err=string}
 //	@Router			/api/v1/film [post]
 func (h *FilmHandler) AddFilm(w http.ResponseWriter, r *http.Request) {
+	// TODO добавить список актёров
 	sc, ok := r.Context().Value(domain.SessionContextKey).(domain.SessionContext)
 	if !ok {
 		domain.WriteError(w, "can`t find user", http.StatusInternalServerError)
