@@ -1,6 +1,10 @@
 // Package domain is used for swagger auto doc
 package domain
 
+import (
+	"time"
+)
+
 type UserRequest struct {
 	ID        int    `json:"id" binding:"required"`
 	Name      string `json:"name" binding:"required"`
@@ -20,4 +24,11 @@ type VideoResponse struct {
 	AgeRestriction   int     `json:"ageRestriction"`
 	Duration         string  `json:"duration"`
 	PreviewVideoPath string  `json:"previewVideoPath"`
+}
+
+type ActorSWG struct {
+	ID        int       `json:"id"`
+	Name      string    `json:"name"`
+	Sex       Sex       `json:"sex"`
+	Birthdate time.Time `json:"birthdate" format:"date"`
 }

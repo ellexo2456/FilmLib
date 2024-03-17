@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"github.com/jackc/pgx/v5"
+	"math"
 
 	"github.com/ellexo2456/FilmLib/internal/domain"
 	logs "github.com/ellexo2456/FilmLib/internal/logger"
@@ -24,13 +25,14 @@ const deleteQuery = `
 const updateQuery = `
 	UPDATE actor
 	SET name = $1, sex = $2, birthdate = $3 
-	WHERE id = $5 
+	WHERE id = $4 
 	RETURNING id, name, sex, birthdate
 `
 
 const selectByIdQuery = `
 	SELECT id, name, sex, birthdate  
 	FROM actor
+	WHERE id = $1
 `
 
 const selectAllQuery = `
@@ -39,9 +41,9 @@ const selectAllQuery = `
        a.sex,
        a.birthdate,
        COALESCE(f.id, 0),
-       COALESCE(f.title, ""),
-       COALESCE(f.description, ""),
-       COALESCE(f.release_date, ""),
+       COALESCE(f.title, ''),
+       COALESCE(f.description, ''),
+       COALESCE(f.release_date, '0001-01-01'),
        COALESCE(f.rating, 0)
 	FROM actor a
          LEFT JOIN film_actor fa ON a.id = fa.actor_id
@@ -92,7 +94,7 @@ func (r *actorsPostgresqlRepository) Delete(id int) error {
 }
 
 func (r *actorsPostgresqlRepository) Update(actor domain.Actor) (domain.Actor, error) {
-	row := r.db.QueryRow(r.ctx, updateQuery, actor.Name, actor.Sex, actor.Birthdate)
+	row := r.db.QueryRow(r.ctx, updateQuery, actor.Name, actor.Sex, actor.Birthdate, actor.ID)
 
 	err := row.Scan(
 		&actor.ID,
@@ -161,6 +163,7 @@ func (r *actorsPostgresqlRepository) SelectAll() ([]domain.Actor, error) {
 
 		actors = append(actors, actor)
 		if film.ID != 0 {
+			film.Rating = math.Trunc(film.Rating*10) / 10
 			actors[0].Films = append(actors[0].Films, film)
 		}
 		prevActorID = actor.ID
@@ -187,12 +190,13 @@ func (r *actorsPostgresqlRepository) SelectAll() ([]domain.Actor, error) {
 			prevActorID = actor.ID
 		}
 		if film.ID != 0 {
+			film.Rating = math.Trunc(film.Rating*10) / 10
 			actors[len(actors)-1].Films = append(actors[len(actors)-1].Films, film)
 		}
 	}
 
 	if len(actors) == 0 {
-		return nil, domain.ErrNotFound
+		return []domain.Actor{}, nil
 	}
 
 	return actors, nil

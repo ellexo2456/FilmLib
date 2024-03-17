@@ -9,18 +9,18 @@ import (
 	"github.com/joho/godotenv"
 	"github.com/swaggo/http-swagger"
 
-	authhttp "github.com/ellexo2456/FilmLib/internal/auth/delivery/http"
-	authpostgres "github.com/ellexo2456/FilmLib/internal/auth/repository/postgresql"
-	authredis "github.com/ellexo2456/FilmLib/internal/auth/repository/redis"
-	authusecase "github.com/ellexo2456/FilmLib/internal/auth/usecase"
+	auth_http "github.com/ellexo2456/FilmLib/internal/auth/delivery/http"
+	auth_postgres "github.com/ellexo2456/FilmLib/internal/auth/repository/postgresql"
+	auth_redis "github.com/ellexo2456/FilmLib/internal/auth/repository/redis"
+	auth_usecase "github.com/ellexo2456/FilmLib/internal/auth/usecase"
 
-	filmshttp "github.com/ellexo2456/FilmLib/internal/films/delivery/http"
-	filmspostgres "github.com/ellexo2456/FilmLib/internal/films/repository/postgresql"
-	filmsusecase "github.com/ellexo2456/FilmLib/internal/films/usecase"
+	films_http "github.com/ellexo2456/FilmLib/internal/films/delivery/http"
+	films_postgres "github.com/ellexo2456/FilmLib/internal/films/repository/postgresql"
+	films_usecase "github.com/ellexo2456/FilmLib/internal/films/usecase"
 
-	actorshttp "github.com/ellexo2456/FilmLib/internal/actors/delivery/http"
-	actorspostgres "github.com/ellexo2456/FilmLib/internal/actors/repository/postgresql"
-	actorsusecase "github.com/ellexo2456/FilmLib/internal/actors/usecase"
+	actors_http "github.com/ellexo2456/FilmLib/internal/actors/delivery/http"
+	actors_postgres "github.com/ellexo2456/FilmLib/internal/actors/repository/postgresql"
+	actors_usecase "github.com/ellexo2456/FilmLib/internal/actors/usecase"
 
 	_ "github.com/ellexo2456/FilmLib/docs"
 	"github.com/ellexo2456/FilmLib/internal/connectors/postgres"
@@ -41,21 +41,21 @@ func StartServer() {
 	rc := redis.Connect()
 	defer rc.Close()
 
-	sr := authredis.NewSessionRedisRepository(rc)
-	ar := authpostgres.NewAuthPostgresqlRepository(pc, ctx)
-	acr := actorspostgres.NewActorsPostgresqlRepository(pc, ctx)
-	fr := filmspostgres.NewFilmsPostgresqlRepository(pc, ctx)
+	sr := auth_redis.NewSessionRedisRepository(rc)
+	ar := auth_postgres.NewAuthPostgresqlRepository(pc, ctx)
+	acr := actors_postgres.NewActorsPostgresqlRepository(pc, ctx)
+	fr := films_postgres.NewFilmsPostgresqlRepository(pc, ctx)
 
-	au := authusecase.NewAuthUsecase(ar, sr)
-	acu := actorsusecase.NewActorsUsecase(acr)
-	fu := filmsusecase.NewFilmsUsecase(fr)
+	au := auth_usecase.NewAuthUsecase(ar, sr)
+	acu := actors_usecase.NewActorsUsecase(acr)
+	fu := films_usecase.NewFilmsUsecase(fr)
 
 	authMux := http.NewServeMux()
 	apiMux := http.NewServeMux()
 
-	authhttp.NewAuthHandler(authMux, au)
-	actorshttp.NewActorsHandler(apiMux, acu)
-	filmshttp.NewFilmHandler(apiMux, fu)
+	auth_http.NewAuthHandler(authMux, au)
+	actors_http.NewActorsHandler(apiMux, acu)
+	films_http.NewFilmHandler(apiMux, fu)
 	mux.HandleFunc("/swagger/*", httpSwagger.WrapHandler)
 
 	mw := middleware.NewAuth(au)

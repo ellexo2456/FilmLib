@@ -19,6 +19,275 @@
     "host": "localhost:3000",
     "basePath": "/",
     "paths": {
+        "/api/v1/actors": {
+            "get": {
+                "description": "Gets all actors with related films.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Actors"
+                ],
+                "summary": "Gets actors.",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "body": {
+                                    "type": "object",
+                                    "properties": {
+                                        "actors": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/domain.Actor"
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "err": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "err": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Modify an actor by id and retrieves a new actor.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Actors"
+                ],
+                "summary": "Modify an actor.",
+                "parameters": [
+                    {
+                        "description": "Actor to modify",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/domain.Actor"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "body": {
+                                    "type": "object",
+                                    "properties": {
+                                        "actors": {
+                                            "$ref": "#/definitions/domain.Actor"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "err": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "err": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "err": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Adds a new actor with the provided data.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Actors"
+                ],
+                "summary": "Adds a new actor.",
+                "parameters": [
+                    {
+                        "description": "actor to add",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/domain.ActorSWG"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "body": {
+                                    "type": "object",
+                                    "properties": {
+                                        "id": {
+                                            "type": "integer"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "err": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "err": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "err": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/actors/{id}": {
+            "delete": {
+                "description": "Deletes an actor by id with all its relations with films.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Actors"
+                ],
+                "summary": "Deletes an actor.",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Actor id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "err": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "err": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "err": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "err": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/auth/login": {
             "post": {
                 "description": "create user session and put it into cookie",
@@ -26,7 +295,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "auth"
+                    "Auth"
                 ],
                 "summary": "login user",
                 "parameters": [
@@ -108,7 +377,7 @@
             "post": {
                 "description": "delete current session and nullify cookie",
                 "tags": [
-                    "auth"
+                    "Auth"
                 ],
                 "summary": "logout user",
                 "responses": {
@@ -172,7 +441,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "auth"
+                    "Auth"
                 ],
                 "summary": "register user",
                 "parameters": [
@@ -239,16 +508,163 @@
                 }
             }
         },
-        "/api/v1/film": {
-            "post": {
-                "description": "Adds new film with provided data.",
+        "/api/v1/films": {
+            "get": {
+                "description": "Gets all films descending sorted by rating (by default). Only one sort can be applied at a time. If several are applied, the priority is as follows: title, releaseDate, rating (by default).",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "Film"
+                    "Films"
                 ],
-                "summary": "Adds new film.",
+                "summary": "Gets films.",
+                "parameters": [
+                    {
+                        "enum": [
+                            "Asc",
+                            "Desc"
+                        ],
+                        "type": "string",
+                        "description": "Direction of title sort. Sorting wont be applied if param isnt specified.",
+                        "name": "sortTitle",
+                        "in": "query"
+                    },
+                    {
+                        "enum": [
+                            "Asc",
+                            "Desc"
+                        ],
+                        "type": "string",
+                        "description": "Direction of release date sort. Sorting wont be applied if param isnt specified.",
+                        "name": "sortReleaseDate",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "body": {
+                                    "type": "object",
+                                    "properties": {
+                                        "films": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/domain.Film"
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "err": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "err": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Modify a film by id and retrieves a new film.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Films"
+                ],
+                "summary": "Modify a film.",
+                "parameters": [
+                    {
+                        "description": "Film to modify",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/domain.Film"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "body": {
+                                    "type": "object",
+                                    "properties": {
+                                        "film": {
+                                            "$ref": "#/definitions/domain.Film"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "err": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "err": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "err": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Adds a new film with provided data.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Films"
+                ],
+                "summary": "Adds a new film.",
                 "parameters": [
                     {
                         "description": "film to add",
@@ -264,25 +680,195 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "json"
+                            "type": "object",
+                            "properties": {
+                                "body": {
+                                    "type": "object",
+                                    "properties": {
+                                        "id": {
+                                            "type": "integer"
+                                        }
+                                    }
+                                }
+                            }
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "type": "json"
+                            "type": "object",
+                            "properties": {
+                                "err": {
+                                    "type": "string"
+                                }
+                            }
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "type": "json"
+                            "type": "object",
+                            "properties": {
+                                "err": {
+                                    "type": "string"
+                                }
+                            }
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "type": "json"
+                            "type": "object",
+                            "properties": {
+                                "err": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/films/search": {
+            "get": {
+                "description": "Searches films by parts of its titles and parts of films names.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Films"
+                ],
+                "summary": "Searches films",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "The string to be searched for",
+                        "name": "searchStr",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "body": {
+                                    "type": "object",
+                                    "properties": {
+                                        "films": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/domain.Film"
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "err": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "err": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "err": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/films/{id}": {
+            "delete": {
+                "description": "Deletes a film by id with all its relations with actors.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Films"
+                ],
+                "summary": "Deletes a film.",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Film id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "err": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "err": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "err": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "err": {
+                                    "type": "string"
+                                }
+                            }
                         }
                     }
                 }
@@ -290,6 +876,27 @@
         }
     },
     "definitions": {
+        "domain.Actor": {
+            "type": "object"
+        },
+        "domain.ActorSWG": {
+            "type": "object",
+            "properties": {
+                "birthdate": {
+                    "type": "string",
+                    "format": "date"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "sex": {
+                    "$ref": "#/definitions/domain.Sex"
+                }
+            }
+        },
         "domain.Credentials": {
             "type": "object",
             "properties": {
@@ -306,6 +913,15 @@
         },
         "domain.Film": {
             "type": "object"
+        },
+        "domain.Sex": {
+            "type": "string",
+            "enum": [
+                "M"
+            ],
+            "x-enum-varnames": [
+                "M"
+            ]
         }
     }
 }

@@ -3,6 +3,7 @@ module github.com/ellexo2456/FilmLib
 go 1.22.1
 
 require (
+	github.com/Masterminds/squirrel v1.5.4
 	github.com/aws/aws-sdk-go v1.50.37
 	github.com/bxcodec/faker v2.0.1+incompatible
 	github.com/go-redis/redismock/v9 v9.2.0
@@ -15,11 +16,10 @@ require (
 	github.com/redis/go-redis/v9 v9.5.1
 	github.com/sirupsen/logrus v1.9.3
 	github.com/stretchr/testify v1.9.0
-	github.com/swaggo/files v1.0.1
 	github.com/swaggo/http-swagger v1.3.4
-	github.com/swaggo/http-swagger/example/go-chi v0.0.0-20230830153024-537f045bded0
 	github.com/swaggo/swag v1.16.3
 	golang.org/x/crypto v0.21.0
+	golang.org/x/net v0.22.0
 	google.golang.org/grpc v1.62.1
 )
 
@@ -38,10 +38,12 @@ require (
 	github.com/jackc/puddle/v2 v2.2.1 // indirect
 	github.com/jmespath/go-jmespath v0.4.0 // indirect
 	github.com/josharian/intern v1.0.0 // indirect
+	github.com/lann/builder v0.0.0-20180802200727-47ae307949d0 // indirect
+	github.com/lann/ps v0.0.0-20150810152359-62de8c46ede0 // indirect
 	github.com/mailru/easyjson v0.7.7 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/stretchr/objx v0.5.2 // indirect
-	golang.org/x/net v0.22.0 // indirect
+	github.com/swaggo/files v1.0.1 // indirect
 	golang.org/x/sync v0.6.0 // indirect
 	golang.org/x/sys v0.18.0 // indirect
 	golang.org/x/text v0.14.0 // indirect

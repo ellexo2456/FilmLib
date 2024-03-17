@@ -31,7 +31,7 @@ func NewAuthHandler(mux *http.ServeMux, u domain.AuthUsecase) {
 //
 //	@Summary		login user
 //	@Description	create user session and put it into cookie
-//	@Tags			auth
+//	@Tags			Auth
 //	@Accept			json
 //	@Param			body	body		domain.Credentials	true	"user credentials"
 //	@Success		200		{object}	object{body=object{id=int}}
@@ -95,7 +95,7 @@ func (a *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 //
 //	@Summary		logout user
 //	@Description	delete current session and nullify cookie
-//	@Tags			auth
+//	@Tags			Auth
 //	@Success		204
 //	@Failure		400	{object}	object{err=string}
 //	@Failure		403	{object}	object{err=string}
@@ -128,7 +128,7 @@ func (a *AuthHandler) Logout(w http.ResponseWriter, r *http.Request) {
 //
 //	@Summary		register user
 //	@Description	add new user to db and return it id
-//	@Tags			auth
+//	@Tags			Auth
 //	@Produce		json
 //	@Accept			json
 //	@Param			body	body		domain.Credentials	true	"user credentials"

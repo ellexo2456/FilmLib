@@ -30,12 +30,12 @@ func NewActorsHandler(mux *http.ServeMux, au domain.ActorsUsecase) {
 //	@Summary		Adds a new actor.
 //	@Description	Adds a new actor with the provided data.
 //	@Tags			Actors
-//	@Param			body	body		domain.Actor	true	"actor to add"
+//	@Param			body	body	domain.ActorSWG	true	"actor to add"
 //	@Produce		json
-//	@Success		200		{json}	object{body=object{id=int}}
-//	@Failure		400		{json}	object{err=string}
-//	@Failure		403		{json}	object{err=string}
-//	@Failure		500		{json}	object{err=string}
+//	@Success		200	{object}	object{body=object{id=int}}
+//	@Failure		400	{object}	object{err=string}
+//	@Failure		403	{object}	object{err=string}
+//	@Failure		500	{object}	object{err=string}
 //	@Router			/api/v1/actors [post]
 func (h *ActorsHandler) AddActor(w http.ResponseWriter, r *http.Request) {
 	sc, ok := r.Context().Value(domain.SessionContextKey).(domain.SessionContext)
@@ -81,41 +81,41 @@ func (h *ActorsHandler) AddActor(w http.ResponseWriter, r *http.Request) {
 // DeleteActor godoc
 //
 //	@Summary		Deletes an actor.
-//	@Description	Deletes an actor by id.
+//	@Description	Deletes an actor by id with all its relations with films.
 //	@Tags			Actors
 //	@Param			id	path	int	true	"Actor id"
 //	@Produce		json
 //	@Success		204
-//	@Failure		400		{json}	object{err=string}
-//	@Failure		403		{json}	object{err=string}
-//	@Failure		404		{json}	object{err=string}
-//	@Failure		500		{json}	object{err=string}
+//	@Failure		400	{object}	object{err=string}
+//	@Failure		403	{object}	object{err=string}
+//	@Failure		404	{object}	object{err=string}
+//	@Failure		500	{object}	object{err=string}
 //	@Router			/api/v1/actors/{id} [delete]
 func (h *ActorsHandler) DeleteActor(w http.ResponseWriter, r *http.Request) {
 	sc, ok := r.Context().Value(domain.SessionContextKey).(domain.SessionContext)
 	if !ok {
 		domain.WriteError(w, "can`t find user", http.StatusInternalServerError)
-		logs.LogError(logs.Logger, "actors/http", "DeleteActor", errors.New("can`t find user"), "can`t find user")
+		logs.LogError(logs.Logger, "actors/http", "DeleteFilm", errors.New("can`t find user"), "can`t find user")
 	}
-	logs.Logger.Debug("DeleteActor session context\n: ", sc)
+	logs.Logger.Debug("DeleteFilm session context\n: ", sc)
 
 	if sc.Role != domain.Moder {
 		domain.WriteError(w, "forbidden", http.StatusForbidden)
-		logs.LogError(logs.Logger, "actors/http", "DeleteActor", errors.New("forbidden"), "invalid role")
+		logs.LogError(logs.Logger, "actors/http", "DeleteFilm", errors.New("forbidden"), "invalid role")
 	}
 
 	id, err := strconv.Atoi(r.PathValue("id"))
 	if err != nil {
 		domain.WriteError(w, err.Error(), http.StatusBadRequest)
-		logs.LogError(logs.Logger, "actors/http", "DeleteActor", err, err.Error())
+		logs.LogError(logs.Logger, "actors/http", "DeleteFilm", err, err.Error())
 		return
 	}
-	logs.Logger.Debug("DeleteActor id:\n", id)
+	logs.Logger.Debug("DeleteFilm id:\n", id)
 
 	err = h.ActorsUsecase.Remove(id)
 	if err != nil {
 		domain.WriteError(w, err.Error(), domain.GetStatusCode(err))
-		logs.LogError(logs.Logger, "actors/http", "DeleteActor", err, err.Error())
+		logs.LogError(logs.Logger, "actors/http", "DeleteFilm", err, err.Error())
 		return
 	}
 
@@ -125,45 +125,45 @@ func (h *ActorsHandler) DeleteActor(w http.ResponseWriter, r *http.Request) {
 // ModifyActor godoc
 //
 //	@Summary		Modify an actor.
-//	@Description	Modify an actor by id and retrieves new actor.
+//	@Description	Modify an actor by id and retrieves a new actor.
 //	@Tags			Actors
-//	@Param			body	body		domain.Actor	true	"actor to add"
+//	@Param			body	body	domain.Actor	true	"Actor to modify"
 //	@Produce		json
-//	@Success		200		{json}	object{body=object{actors=domain.Actor}}
-//	@Failure		400		{json}	object{err=string}
-//	@Failure		403		{json}	object{err=string}
-//	@Failure		500		{json}	object{err=string}
+//	@Success		200	{object}	object{body=object{actors=domain.Actor}}
+//	@Failure		400	{object}	object{err=string}
+//	@Failure		403	{object}	object{err=string}
+//	@Failure		500	{object}	object{err=string}
 //	@Router			/api/v1/actors [put]
 func (h *ActorsHandler) ModifyActor(w http.ResponseWriter, r *http.Request) {
 	sc, ok := r.Context().Value(domain.SessionContextKey).(domain.SessionContext)
 	if !ok {
 		domain.WriteError(w, "can`t find user", http.StatusInternalServerError)
-		logs.LogError(logs.Logger, "actors/http", "ModifyActor", errors.New("can`t find user"), "can`t find user")
+		logs.LogError(logs.Logger, "actors/http", "ModifyFilm", errors.New("can`t find user"), "can`t find user")
 	}
-	logs.Logger.Debug("DeleteActor session context\n: ", sc)
+	logs.Logger.Debug("DeleteFilm session context\n: ", sc)
 
 	if sc.Role != domain.Moder {
 		domain.WriteError(w, "forbidden", http.StatusForbidden)
-		logs.LogError(logs.Logger, "actors/http", "ModifyActor", errors.New("forbidden"), "invalid role")
+		logs.LogError(logs.Logger, "actors/http", "ModifyFilm", errors.New("forbidden"), "invalid role")
 	}
 
 	var actor domain.Actor
 	err := json.NewDecoder(r.Body).Decode(&actor)
 	if err != nil {
 		domain.WriteError(w, err.Error(), http.StatusBadRequest)
-		logs.LogError(logs.Logger, "actors/http", "ModifyActor", err, err.Error())
+		logs.LogError(logs.Logger, "actors/http", "ModifyFilm", err, err.Error())
 		return
 	}
-	logs.Logger.Debug("ModifyActor new actor:\n", actor)
-	defer domain.CloseAndAlert(r.Body, "actors/http", "ModifyActor")
+	logs.Logger.Debug("ModifyFilm new actor:\n", actor)
+	defer domain.CloseAndAlert(r.Body, "actors/http", "ModifyFilm")
 
 	actor, err = h.ActorsUsecase.Modify(actor)
 	if err != nil {
 		domain.WriteError(w, err.Error(), domain.GetStatusCode(err))
-		logs.LogError(logs.Logger, "actors/http", "ModifyActor", err, err.Error())
+		logs.LogError(logs.Logger, "actors/http", "ModifyFilm", err, err.Error())
 		return
 	}
-	logs.Logger.Debug("ModifyActor updated actor:\n", actor)
+	logs.Logger.Debug("ModifyFilm updated actor:\n", actor)
 
 	domain.WriteResponse(
 		w,
@@ -176,14 +176,13 @@ func (h *ActorsHandler) ModifyActor(w http.ResponseWriter, r *http.Request) {
 
 // GetActors godoc
 //
-//	@Summary		Gets an actors.
+//	@Summary		Gets actors.
 //	@Description	Gets all actors with related films.
 //	@Tags			Actors
 //	@Produce		json
-//	@Success		200		{json}	object{body=object{actors=[]domain.Actor}}
-//	@Failure		400		{json}	object{err=string}
-//	@Failure		404		{json}	object{err=string}
-//	@Failure		500		{json}	object{err=string}
+//	@Success		200	{object}	object{body=object{actors=[]domain.Actor}}
+//	@Failure		400	{object}	object{err=string}
+//	@Failure		500	{object}	object{err=string}
 //	@Router			/api/v1/actors [get]
 func (h *ActorsHandler) GetActors(w http.ResponseWriter, r *http.Request) {
 	actors, err := h.ActorsUsecase.GetAll()
