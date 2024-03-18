@@ -1,8 +1,6 @@
 package logs
 
 import (
-	"github.com/joho/godotenv"
-	"log"
 	"os"
 
 	"github.com/sirupsen/logrus"
@@ -11,11 +9,6 @@ import (
 var Logger = LoggerInit()
 
 func LoggerInit() *logrus.Logger {
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatal(err)
-	}
-
 	logger := logrus.New()
 	logger.SetFormatter(&logrus.JSONFormatter{})
 
