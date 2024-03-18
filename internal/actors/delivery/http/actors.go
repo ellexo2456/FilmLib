@@ -30,7 +30,7 @@ func NewActorsHandler(mux *http.ServeMux, au domain.ActorsUsecase) {
 //	@Summary		Adds a new actor.
 //	@Description	Adds a new actor with the provided data.
 //	@Tags			Actors
-//	@Param			body	body	domain.ActorSWG	true	"actor to add"
+//	@Param			body	body	domain.ActorToAdd	true	"actor to add"
 //	@Produce		json
 //	@Success		200	{object}	object{body=object{id=int}}
 //	@Failure		400	{object}	object{err=string}
@@ -127,9 +127,9 @@ func (h *ActorsHandler) DeleteActor(w http.ResponseWriter, r *http.Request) {
 //	@Summary		Modify an actor.
 //	@Description	Modify an actor by id and retrieves a new actor.
 //	@Tags			Actors
-//	@Param			body	body	domain.Actor	true	"Actor to modify"
+//	@Param			body	body	domain.ActorWithoutFilms	true	"Actor to modify"
 //	@Produce		json
-//	@Success		200	{object}	object{body=object{actors=domain.Actor}}
+//	@Success		200	{object}	object{body=object{actors=domain.ActorWithoutFilms}}
 //	@Failure		400	{object}	object{err=string}
 //	@Failure		403	{object}	object{err=string}
 //	@Failure		500	{object}	object{err=string}
@@ -180,7 +180,7 @@ func (h *ActorsHandler) ModifyActor(w http.ResponseWriter, r *http.Request) {
 //	@Description	Gets all actors with related films.
 //	@Tags			Actors
 //	@Produce		json
-//	@Success		200	{object}	object{body=object{actors=[]domain.Actor}}
+//	@Success		200	{object}	object{body=object{actors=[]domain.ActorWithFilms}}
 //	@Failure		400	{object}	object{err=string}
 //	@Failure		500	{object}	object{err=string}
 //	@Router			/api/v1/actors [get]

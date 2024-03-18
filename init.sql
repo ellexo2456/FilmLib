@@ -7,7 +7,7 @@ CREATE TABLE "user"
     id         SERIAL PRIMARY KEY,
     email      TEXT  NOT NULL UNIQUE,
     password   BYTEA NOT NULL UNIQUE,
-    role       INT,
+    role       INT DEFAULT 0,
     created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
 );

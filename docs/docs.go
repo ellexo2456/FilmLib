@@ -44,7 +44,7 @@ const docTemplate = `{
                                         "actors": {
                                             "type": "array",
                                             "items": {
-                                                "$ref": "#/definitions/domain.Actor"
+                                                "$ref": "#/definitions/domain.ActorWithFilms"
                                             }
                                         }
                                     }
@@ -92,7 +92,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/domain.Actor"
+                            "$ref": "#/definitions/domain.ActorWithoutFilms"
                         }
                     }
                 ],
@@ -106,7 +106,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "actors": {
-                                            "$ref": "#/definitions/domain.Actor"
+                                            "$ref": "#/definitions/domain.ActorWithoutFilms"
                                         }
                                     }
                                 }
@@ -164,7 +164,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/domain.ActorSWG"
+                            "$ref": "#/definitions/domain.ActorToAdd"
                         }
                     }
                 ],
@@ -555,7 +555,7 @@ const docTemplate = `{
                                         "films": {
                                             "type": "array",
                                             "items": {
-                                                "$ref": "#/definitions/domain.Film"
+                                                "$ref": "#/definitions/domain.FilmWithoutActors"
                                             }
                                         }
                                     }
@@ -603,7 +603,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/domain.Film"
+                            "$ref": "#/definitions/domain.FilmWithoutActors"
                         }
                     }
                 ],
@@ -617,7 +617,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "film": {
-                                            "$ref": "#/definitions/domain.Film"
+                                            "$ref": "#/definitions/domain.FilmWithoutActors"
                                         }
                                     }
                                 }
@@ -675,7 +675,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/domain.Film"
+                            "$ref": "#/definitions/domain.FilmToAdd"
                         }
                     }
                 ],
@@ -763,7 +763,7 @@ const docTemplate = `{
                                         "films": {
                                             "type": "array",
                                             "items": {
-                                                "$ref": "#/definitions/domain.Film"
+                                                "$ref": "#/definitions/domain.FilmWithoutActors"
                                             }
                                         }
                                     }
@@ -879,10 +879,54 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "domain.Actor": {
-            "type": "object"
+        "domain.ActorToAdd": {
+            "type": "object",
+            "properties": {
+                "birthdate": {
+                    "type": "string",
+                    "format": "date"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "sex": {
+                    "$ref": "#/definitions/domain.Sex"
+                }
+            }
         },
-        "domain.ActorSWG": {
+        "domain.ActorToFilmAdd": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "domain.ActorWithFilms": {
+            "type": "object",
+            "properties": {
+                "birthdate": {
+                    "type": "string",
+                    "format": "date"
+                },
+                "films": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/domain.FilmWithoutActors"
+                    }
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "sex": {
+                    "$ref": "#/definitions/domain.Sex"
+                }
+            }
+        },
+        "domain.ActorWithoutFilms": {
             "type": "object",
             "properties": {
                 "birthdate": {
@@ -914,8 +958,50 @@ const docTemplate = `{
                 }
             }
         },
-        "domain.Film": {
-            "type": "object"
+        "domain.FilmToAdd": {
+            "type": "object",
+            "properties": {
+                "actors": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/domain.ActorToFilmAdd"
+                    }
+                },
+                "description": {
+                    "type": "string"
+                },
+                "rating": {
+                    "type": "number"
+                },
+                "releaseDate": {
+                    "type": "string",
+                    "format": "date"
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
+        "domain.FilmWithoutActors": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "rating": {
+                    "type": "number"
+                },
+                "releaseDate": {
+                    "type": "string",
+                    "format": "date"
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
         },
         "domain.Sex": {
             "type": "string",

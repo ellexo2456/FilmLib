@@ -5,30 +5,43 @@ import (
 	"time"
 )
 
-type UserRequest struct {
-	ID        int    `json:"id" binding:"required"`
-	Name      string `json:"name" binding:"required"`
-	Password  string `json:"password" binding:"required"`
-	Email     string `json:"email" binding:"required"`
-	ImagePath string `json:"imagePath"`
+type ActorWithFilms struct {
+	ID        int                 `json:"id"`
+	Name      string              `json:"name"`
+	Sex       Sex                 `json:"sex"`
+	Birthdate time.Time           `json:"birthdate" format:"date"`
+	Films     []FilmWithoutActors `json:"films"`
 }
 
-type VideoResponse struct {
-	ID               int     `json:"id"`
-	Name             string  `json:"name"`
-	Description      string  `json:"description"`
-	PreviewPath      string  `json:"previewPath"`
-	MediaPath        string  `json:"mediaPath"`
-	ReleaseYear      int     `json:"releaseYear"`
-	Rating           float64 `json:"rating"`
-	AgeRestriction   int     `json:"ageRestriction"`
-	Duration         string  `json:"duration"`
-	PreviewVideoPath string  `json:"previewVideoPath"`
+type ActorToAdd struct {
+	Name      string    `json:"name"`
+	Sex       Sex       `json:"sex"`
+	Birthdate time.Time `json:"birthdate" format:"date"`
 }
 
-type ActorSWG struct {
+type ActorToFilmAdd struct {
+	ID int `json:"id"`
+}
+
+type ActorWithoutFilms struct {
 	ID        int       `json:"id"`
 	Name      string    `json:"name"`
 	Sex       Sex       `json:"sex"`
 	Birthdate time.Time `json:"birthdate" format:"date"`
+}
+
+type FilmWithoutActors struct {
+	ID          int       `json:"id"`
+	Title       string    `json:"title"`
+	Description string    `json:"description"`
+	ReleaseDate time.Time `json:"releaseDate" format:"date"`
+	Rating      float64   `json:"rating"`
+}
+
+type FilmToAdd struct {
+	Title       string           `json:"title"`
+	Description string           `json:"description"`
+	ReleaseDate time.Time        `json:"releaseDate" format:"date"`
+	Rating      float64          `json:"rating"`
+	Actors      []ActorToFilmAdd `json:"actors"`
 }

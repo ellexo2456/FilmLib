@@ -1,8 +1,37 @@
 basePath: /
 definitions:
-  domain.Actor:
+  domain.ActorToAdd:
+    properties:
+      birthdate:
+        format: date
+        type: string
+      name:
+        type: string
+      sex:
+        $ref: '#/definitions/domain.Sex'
     type: object
-  domain.ActorSWG:
+  domain.ActorToFilmAdd:
+    properties:
+      id:
+        type: integer
+    type: object
+  domain.ActorWithFilms:
+    properties:
+      birthdate:
+        format: date
+        type: string
+      films:
+        items:
+          $ref: '#/definitions/domain.FilmWithoutActors'
+        type: array
+      id:
+        type: integer
+      name:
+        type: string
+      sex:
+        $ref: '#/definitions/domain.Sex'
+    type: object
+  domain.ActorWithoutFilms:
     properties:
       birthdate:
         format: date
@@ -23,7 +52,35 @@ definitions:
           type: integer
         type: array
     type: object
-  domain.Film:
+  domain.FilmToAdd:
+    properties:
+      actors:
+        items:
+          $ref: '#/definitions/domain.ActorToFilmAdd'
+        type: array
+      description:
+        type: string
+      rating:
+        type: number
+      releaseDate:
+        format: date
+        type: string
+      title:
+        type: string
+    type: object
+  domain.FilmWithoutActors:
+    properties:
+      description:
+        type: string
+      id:
+        type: integer
+      rating:
+        type: number
+      releaseDate:
+        format: date
+        type: string
+      title:
+        type: string
     type: object
   domain.Sex:
     enum:
@@ -57,7 +114,7 @@ paths:
                 properties:
                   actors:
                     items:
-                      $ref: '#/definitions/domain.Actor'
+                      $ref: '#/definitions/domain.ActorWithFilms'
                     type: array
                 type: object
             type: object
@@ -86,7 +143,7 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/domain.ActorSWG'
+          $ref: '#/definitions/domain.ActorToAdd'
       produces:
       - application/json
       responses:
@@ -132,7 +189,7 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/domain.Actor'
+          $ref: '#/definitions/domain.ActorWithoutFilms'
       produces:
       - application/json
       responses:
@@ -143,7 +200,7 @@ paths:
               body:
                 properties:
                   actors:
-                    $ref: '#/definitions/domain.Actor'
+                    $ref: '#/definitions/domain.ActorWithoutFilms'
                 type: object
             type: object
         "400":
@@ -388,7 +445,7 @@ paths:
                 properties:
                   films:
                     items:
-                      $ref: '#/definitions/domain.Film'
+                      $ref: '#/definitions/domain.FilmWithoutActors'
                     type: array
                 type: object
             type: object
@@ -417,7 +474,7 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/domain.Film'
+          $ref: '#/definitions/domain.FilmToAdd'
       produces:
       - application/json
       responses:
@@ -463,7 +520,7 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/domain.Film'
+          $ref: '#/definitions/domain.FilmWithoutActors'
       produces:
       - application/json
       responses:
@@ -474,7 +531,7 @@ paths:
               body:
                 properties:
                   film:
-                    $ref: '#/definitions/domain.Film'
+                    $ref: '#/definitions/domain.FilmWithoutActors'
                 type: object
             type: object
         "400":
@@ -566,7 +623,7 @@ paths:
                 properties:
                   films:
                     items:
-                      $ref: '#/definitions/domain.Film'
+                      $ref: '#/definitions/domain.FilmWithoutActors'
                     type: array
                 type: object
             type: object

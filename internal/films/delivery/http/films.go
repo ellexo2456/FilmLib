@@ -31,7 +31,7 @@ func NewFilmsHandler(mux *http.ServeMux, fu domain.FilmsUsecase) {
 //	@Summary		Adds a new film.
 //	@Description	Adds a new film with provided data.
 //	@Tags			Films
-//	@Param			body	body	domain.Film	true	"film to add"
+//	@Param			body	body	domain.FilmToAdd	true	"film to add"
 //	@Produce		json
 //	@Success		200	{object}	object{body=object{id=int}}
 //	@Failure		400	{object}	object{err=string}
@@ -86,7 +86,7 @@ func (h *FilmsHandler) AddFilm(w http.ResponseWriter, r *http.Request) {
 //	@Param			sortTitle		query	domain.SortDirection	false	"Direction of title sort. Sorting wont be applied if param isnt specified."
 //	@Param			sortReleaseDate	query	domain.SortDirection	false	"Direction of release date sort. Sorting wont be applied if param isnt specified."
 //	@Produce		json
-//	@Success		200	{object}	object{body=object{films=[]domain.Film}}
+//	@Success		200	{object}	object{body=object{films=[]domain.FilmWithoutActors}}
 //	@Failure		400	{object}	object{err=string}
 //	@Failure		500	{object}	object{err=string}
 //	@Router			/api/v1/films [get]
@@ -119,7 +119,7 @@ func (h *FilmsHandler) GetFilms(w http.ResponseWriter, r *http.Request) {
 //	@Tags			Films
 //	@Produce		json
 //	@Param			searchStr	query		string	true	"The string to be searched for"
-//	@Success		200			{object}	object{body=object{films=[]domain.Film}}
+//	@Success		200			{object}	object{body=object{films=[]domain.FilmWithoutActors}}
 //	@Failure		400			{object}	object{err=string}
 //	@Failure		404			{object}	object{err=string}
 //	@Failure		500			{object}	object{err=string}
@@ -194,9 +194,9 @@ func (h *FilmsHandler) DeleteFilm(w http.ResponseWriter, r *http.Request) {
 //	@Summary		Modify a film.
 //	@Description	Modify a film by id and retrieves a new film.
 //	@Tags			Films
-//	@Param			body	body	domain.Film	true	"Film to modify"
+//	@Param			body	body	domain.FilmWithoutActors	true	"Film to modify"
 //	@Produce		json
-//	@Success		200	{object}	object{body=object{film=domain.Film}}
+//	@Success		200	{object}	object{body=object{film=domain.FilmWithoutActors}}
 //	@Failure		400	{object}	object{err=string}
 //	@Failure		403	{object}	object{err=string}
 //	@Failure		500	{object}	object{err=string}

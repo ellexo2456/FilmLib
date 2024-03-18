@@ -168,7 +168,7 @@ func descRating() func(a, b domain.Film) int {
 }
 
 func isEmpty(film domain.Film) bool {
-	if film.Rating == 0 {
+	if film.Rating < 0 {
 		return true
 	}
 	if !film.ReleaseDate.Valid || len(film.Actors) == 0 {
