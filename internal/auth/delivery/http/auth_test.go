@@ -1,26 +1,21 @@
-package http
+package http_test
 
 import (
 	"bytes"
 	"encoding/json"
-	"net/http"
-	"net/http/httptest"
-	"strings"
-	"testing"
-	"time"
-
-	"github.com/gorilla/mux"
-
-	"github.com/google/uuid"
-
+	"errors"
+	"github.com/bxcodec/faker"
+	auth_http "github.com/ellexo2456/FilmLib/internal/auth/delivery/http"
+	"github.com/ellexo2456/FilmLib/internal/domain"
+	"github.com/ellexo2456/FilmLib/internal/domain/mocks"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
-
-	"2023_2_Holi/domain"
-	"2023_2_Holi/domain/mocks"
+	"golang.org/x/net/context"
+	"net/http"
+	"net/http/httptest"
+	"testing"
+	"time"
 )
-
-const userID = "1"
 
 func TestLogin(t *testing.T) {
 	tests := []struct {
@@ -29,34 +24,46 @@ func TestLogin(t *testing.T) {
 		setUCaseExpectations func(session *domain.Session, uCase *mocks.AuthUsecase)
 		status               int
 		wantCookie           bool
-		auth                 string
 		setAuth              func(r *http.Request, uCase *mocks.AuthUsecase, session *domain.Session)
 	}{
-		//{
-		//	name: "GoodCase/Common",
-		//	getBody: func() []byte {
-		//		var creds domain.Credentials
-		//		faker.FakeData(&creds.Password)
-		//		creds.Email = "ferfg@fsf.ru"
-		//		creds.Password = []byte{61,
-		//			73, 76, 31}
-		//		jsonBody, _ := json.Marshal(creds)
-		//		return jsonBody
-		//	},
-		//	setUCaseExpectations: func(session *domain.Session, uCase *mocks.AuthUsecase) {
-		//		err := faker.FakeData(session)
-		//		assert.NoError(t, err)
-		//		session.ExpiresAt = time.Now().Add(24 * time.Hour)
-		//
-		//		uCase.On("Login", mock.Anything).Return(*session, 1, nil)
-		//	},
-		//	status:     http.StatusOK,
-		//	wantCookie: true,
-		//},
+		{
+			name: "GoodCase/Common",
+			getBody: func() []byte {
+				var creds domain.Credentials
+				faker.FakeData(&creds.Password)
+				creds.Email = "ferfg@fsf.ru"
+				jsonBody, _ := json.Marshal(creds)
+				return jsonBody
+			},
+			setUCaseExpectations: func(session *domain.Session, uCase *mocks.AuthUsecase) {
+				err := faker.FakeData(session)
+				assert.NoError(t, err)
+				session.ExpiresAt = time.Now().Add(24 * time.Hour)
+
+				uCase.On("Login", mock.Anything).Return(*session, 1, nil)
+			},
+			status:     http.StatusOK,
+			wantCookie: true,
+		},
 		{
 			name: "BadCase/EmptyCredentials",
 			getBody: func() []byte {
 				jsonBody, _ := json.Marshal(domain.Credentials{})
+				return jsonBody
+			},
+			setUCaseExpectations: func(session *domain.Session, uCase *mocks.AuthUsecase) {
+				*session = domain.Session{}
+				uCase.On("Login", mock.Anything).Return(*session, 0, domain.ErrWrongCredentials).Maybe()
+			},
+			status: http.StatusBadRequest,
+		},
+		{
+			name: "BadCase/WrongCredentials",
+			getBody: func() []byte {
+				var creds domain.Credentials
+				faker.FakeData(&creds.Password)
+				creds.Email = "fsf.ru"
+				jsonBody, _ := json.Marshal(creds)
 				return jsonBody
 			},
 			setUCaseExpectations: func(session *domain.Session, uCase *mocks.AuthUsecase) {
@@ -98,156 +105,158 @@ func TestLogin(t *testing.T) {
 			},
 			status: http.StatusBadRequest,
 		},
-		//{
-		//	name: "BadCase/AlreadyAuthorized",
-		//	getBody: func() []byte {
-		//		var creds domain.Credentials
-		//		faker.FakeData(&creds.Password)
-		//		creds.Email = "ferfg@fsf.ru"
-		//		jsonBody, _ := json.Marshal(creds)
-		//		return jsonBody
-		//	},
-		//	setUCaseExpectations: func(session *domain.Session, uCase *mocks.AuthUsecase) {
-		//		err := faker.FakeData(session)
-		//		assert.NoError(t, err)
-		//		session.ExpiresAt = time.Now().Add(24 * time.Hour)
-		//
-		//		uCase.On("Login", mock.Anything).Return(*session, 0, nil).Maybe()
-		//	},
-		//	status: http.StatusConflict,
-		//	auth:   userID,
-		//	setAuth: func(r *http.Request, uCase *mocks.AuthUsecase, session *domain.Session) {
-		//		r.AddCookie(&http.Cookie{
-		//			Name:     "session_token",
-		//			Value:    session.Token,
-		//			Expires:  session.ExpiresAt,
-		//			Path:     "/",
-		//			HttpOnly: true,
-		//		})
-		//		uCase.On("IsAuth", mock.Anything).Return(userID, nil)
-		//	},
-		//},
-		//{
-		//	name: "GoodCase/AlreadyAuthorizedExpiredCookie",
-		//	getBody: func() []byte {
-		//		var creds domain.Credentials
-		//		faker.FakeData(&creds.Password)
-		//		creds.Email = "ferfg@fsf.ru"
-		//		jsonBody, _ := json.Marshal(creds)
-		//		return jsonBody
-		//	},
-		//	setUCaseExpectations: func(session *domain.Session, uCase *mocks.AuthUsecase) {
-		//		err := faker.FakeData(session)
-		//		assert.NoError(t, err)
-		//		session.ExpiresAt = time.Now()
-		//
-		//		uCase.On("Login", mock.Anything).Return(*session, 1, nil).Maybe()
-		//	},
-		//	status:     http.StatusOK,
-		//	wantCookie: true,
-		//	auth:       userID,
-		//	setAuth: func(r *http.Request, uCase *mocks.AuthUsecase, session *domain.Session) {
-		//		r.AddCookie(&http.Cookie{
-		//			Name:     "session_token",
-		//			Value:    session.Token,
-		//			Expires:  session.ExpiresAt,
-		//			Path:     "/",
-		//			HttpOnly: true,
-		//		})
-		//		uCase.On("IsAuth", mock.Anything).Return("", nil).Maybe()
-		//	},
-		//},
-		//{
-		//	name: "GoodCase/AlreadyAuthorizedWrongCookie",
-		//	getBody: func() []byte {
-		//		var creds domain.Credentials
-		//		faker.FakeData(&creds.Password)
-		//		creds.Email = "ferfg@fsf.ru"
-		//		jsonBody, _ := json.Marshal(creds)
-		//		return jsonBody
-		//	},
-		//	setUCaseExpectations: func(session *domain.Session, uCase *mocks.AuthUsecase) {
-		//		err := faker.FakeData(session)
-		//		assert.NoError(t, err)
-		//		session.ExpiresAt = time.Now().Add(24 * time.Hour)
-		//
-		//		uCase.On("Login", mock.Anything).Return(*session, 1, nil).Maybe()
-		//	},
-		//	status:     http.StatusOK,
-		//	wantCookie: true,
-		//	auth:       userID,
-		//	setAuth: func(r *http.Request, uCase *mocks.AuthUsecase, session *domain.Session) {
-		//		r.AddCookie(&http.Cookie{
-		//			Name:     "fevk",
-		//			Value:    session.Token,
-		//			Expires:  session.ExpiresAt,
-		//			Path:     "/",
-		//			HttpOnly: true,
-		//		})
-		//		uCase.On("IsAuth", mock.Anything).Return("", nil).Maybe()
-		//	},
-		//},
-		//{
-		//	name: "BadCase/UserNotFound",
-		//	getBody: func() []byte {
-		//		var creds domain.Credentials
-		//		faker.FakeData(&creds.Password)
-		//		creds.Email = "ferfg@fsf.ru"
-		//		jsonBody, _ := json.Marshal(creds)
-		//		return jsonBody
-		//	},
-		//	setUCaseExpectations: func(session *domain.Session, uCase *mocks.AuthUsecase) {
-		//		*session = domain.Session{}
-		//
-		//		uCase.On("IsAuth", mock.Anything).Return("", nil).Maybe()
-		//		uCase.On("Login", mock.Anything).Return(*session, 0, domain.ErrNotFound)
-		//	},
-		//	status: http.StatusNotFound,
-		//},
+		{
+			name: "BadCase/AlreadyAuthorized",
+			getBody: func() []byte {
+				var creds domain.Credentials
+				faker.FakeData(&creds.Password)
+				creds.Email = "ferfg@fsf.ru"
+				jsonBody, _ := json.Marshal(creds)
+				return jsonBody
+			},
+			setUCaseExpectations: func(session *domain.Session, uCase *mocks.AuthUsecase) {
+				err := faker.FakeData(session)
+				assert.NoError(t, err)
+
+				session.UserID = 1
+				session.ExpiresAt = time.Now().Add(24 * time.Hour)
+				session.Role = domain.Usr
+
+				uCase.On("Login", mock.Anything).Return(*session, 0, nil).Maybe()
+			},
+			status: http.StatusConflict,
+			setAuth: func(r *http.Request, uCase *mocks.AuthUsecase, session *domain.Session) {
+				r.AddCookie(&http.Cookie{
+					Name:     "session_token",
+					Value:    session.Token,
+					Expires:  session.ExpiresAt,
+					Path:     "/",
+					HttpOnly: true,
+				})
+
+				uCase.On("RetrieveSessionContext", session.Token).
+					Return(domain.SessionContext{
+						UserID: session.UserID,
+						Role:   session.Role,
+					}, nil)
+			},
+		},
+		{
+			name: "GoodCase/AlreadyAuthorizedExpiredCookie",
+			getBody: func() []byte {
+				var creds domain.Credentials
+				faker.FakeData(&creds.Password)
+				creds.Email = "ferfg@fsf.ru"
+				jsonBody, _ := json.Marshal(creds)
+				return jsonBody
+			},
+			setUCaseExpectations: func(session *domain.Session, uCase *mocks.AuthUsecase) {
+				err := faker.FakeData(session)
+				assert.NoError(t, err)
+
+				session.UserID = 1
+				session.ExpiresAt = time.Now()
+				session.Role = domain.Usr
+
+				uCase.On("Login", mock.Anything).Return(*session, 1, nil)
+			},
+			status:     http.StatusOK,
+			wantCookie: true,
+			setAuth: func(r *http.Request, uCase *mocks.AuthUsecase, session *domain.Session) {
+				r.AddCookie(&http.Cookie{
+					Name:     "session_token",
+					Value:    session.Token,
+					Expires:  session.ExpiresAt,
+					Path:     "/",
+					HttpOnly: true,
+				})
+				uCase.On("RetrieveSessionContext", session.Token).
+					Return(domain.SessionContext{
+						UserID: session.UserID,
+						Role:   session.Role,
+					}, domain.ErrUnauthorized).Maybe()
+			},
+		},
+		{
+			name: "GoodCase/AlreadyAuthorizedWrongCookie",
+			getBody: func() []byte {
+				var creds domain.Credentials
+				faker.FakeData(&creds.Password)
+				creds.Email = "ferfg@fsf.ru"
+				jsonBody, _ := json.Marshal(creds)
+				return jsonBody
+			},
+			setUCaseExpectations: func(session *domain.Session, uCase *mocks.AuthUsecase) {
+				err := faker.FakeData(session)
+				assert.NoError(t, err)
+
+				session.ExpiresAt = time.Now().Add(24 * time.Hour)
+				session.Role = domain.Usr
+
+				uCase.On("Login", mock.Anything).Return(*session, 1, nil).Maybe()
+			},
+			status:     http.StatusOK,
+			wantCookie: true,
+			setAuth: func(r *http.Request, uCase *mocks.AuthUsecase, session *domain.Session) {
+				r.AddCookie(&http.Cookie{
+					Name:     "fevk",
+					Value:    session.Token,
+					Expires:  session.ExpiresAt,
+					Path:     "/",
+					HttpOnly: true,
+				})
+				uCase.On("RetrieveSessionContext", session.Token).
+					Return(domain.SessionContext{
+						UserID: session.UserID,
+						Role:   session.Role,
+					}, domain.ErrBadRequest)
+			},
+		},
+		{
+			name: "BadCase/UserNotFound",
+			getBody: func() []byte {
+				var creds domain.Credentials
+				faker.FakeData(&creds.Password)
+				creds.Email = "ferfg@fsf.ru"
+				jsonBody, _ := json.Marshal(creds)
+				return jsonBody
+			},
+			setUCaseExpectations: func(session *domain.Session, uCase *mocks.AuthUsecase) {
+				*session = domain.Session{}
+
+				uCase.On("Login", mock.Anything).Return(*session, 0, domain.ErrNotFound).Maybe()
+			},
+			status: http.StatusNotFound,
+		},
 	}
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			//t.Parallel()
+			mockUsecase := new(mocks.AuthUsecase)
+			var session domain.Session
 
-			req, err := http.NewRequest("POST", "/api/v1/auth/login", bytes.NewReader(test.getBody()))
-			assert.NoError(t, err)
-			req.Header.Set("Content-Type", "application/json")
+			test.setUCaseExpectations(&session, mockUsecase)
 
-			var mockSession domain.Session
-			mockUCase := new(mocks.AuthUsecase)
-			test.setUCaseExpectations(&mockSession, mockUCase)
-			if test.auth != "" {
-				test.setAuth(req, mockUCase, &mockSession)
-			}
+			req := httptest.NewRequest("POST", "/api/v1/auth/login", bytes.NewReader(test.getBody()))
+			req = req.WithContext(context.Background())
 			rec := httptest.NewRecorder()
-			NewAuthHandler(mux.NewRouter(), mockUCase)
-			handler := &AuthHandler{
-				AuthUsecase: mockUCase,
+
+			if test.setAuth != nil {
+				test.setAuth(req, mockUsecase, &session)
 			}
 
+			handler := &auth_http.AuthHandler{AuthUsecase: mockUsecase}
 			handler.Login(rec, req)
 
 			assert.Equal(t, test.status, rec.Code)
-			mockUCase.AssertExpectations(t)
-
-			cookies := rec.Result().Cookies()
-			assert.NotEqual(t, len(cookies) == 0, test.wantCookie)
 
 			if test.wantCookie {
-				var sessionCookie *http.Cookie
-				for _, cookie := range cookies {
-					if cookie.Name == "session_token" {
-						sessionCookie = cookie
-						break
-					}
-				}
-				assert.NotNil(t, sessionCookie)
-				assert.Equal(t, mockSession.Token, sessionCookie.Value)
-
-				expectedExpires := mockSession.ExpiresAt
-				assert.WithinDuration(t, expectedExpires, sessionCookie.Expires, time.Second)
+				cookies := rec.Result().Cookies()
+				assert.NotEmpty(t, cookies)
+				assert.Equal(t, "session_token", cookies[0].Name)
 			}
+
+			mockUsecase.AssertExpectations(t)
 		})
 	}
 }
@@ -255,66 +264,58 @@ func TestLogin(t *testing.T) {
 func TestLogout(t *testing.T) {
 	tests := []struct {
 		name                 string
-		getCookie            func() *http.Cookie
-		setUCaseExpectations func(uCase *mocks.AuthUsecase)
+		setUCaseExpectations func(session *domain.Session, uCase *mocks.AuthUsecase)
 		status               int
-		wantCookie           bool
 	}{
 		{
 			name: "GoodCase/Common",
-			getCookie: func() *http.Cookie {
-				return &http.Cookie{
-					Name:    "session_token",
-					Value:   uuid.NewString(),
-					Expires: time.Now().Add(24 * time.Hour),
+			setUCaseExpectations: func(session *domain.Session, uCase *mocks.AuthUsecase) {
+				*session = domain.Session{
+					Token:     "session_token",
+					ExpiresAt: time.Now().Add(24 * time.Hour),
+					UserID:    1,
+					Role:      domain.Usr,
 				}
-			},
-			setUCaseExpectations: func(uCase *mocks.AuthUsecase) {
-				uCase.On("IsAuth", mock.Anything).Return(userID, nil)
+
+				uCase.On("RetrieveSessionContext", mock.Anything).Return(domain.SessionContext{UserID: 1, Role: domain.Usr}, nil)
 				uCase.On("Logout", mock.Anything).Return(nil)
 			},
-			status:     http.StatusNoContent,
-			wantCookie: true,
+			status: http.StatusNoContent,
+		},
+		{
+			name: "BadCase/NotAuthorized",
+			setUCaseExpectations: func(session *domain.Session, uCase *mocks.AuthUsecase) {
+				*session = domain.Session{}
+
+				uCase.On("RetrieveSessionContext", mock.Anything).
+					Return(domain.SessionContext{
+						UserID: 0,
+						Role:   domain.Usr,
+					}, domain.ErrUnauthorized)
+				uCase.On("Logout", "session_token").Return(nil).Maybe()
+
+			},
+			status: http.StatusUnauthorized,
 		},
 	}
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			//t.Parallel()
+			mockUsecase := new(mocks.AuthUsecase)
+			session := &domain.Session{}
+			test.setUCaseExpectations(session, mockUsecase)
 
-			req, err := http.NewRequest("POST", "/api/v1/auth/logout", strings.NewReader(""))
-			assert.NoError(t, err)
-			req.AddCookie(test.getCookie())
-
-			mockUCase := new(mocks.AuthUsecase)
-			test.setUCaseExpectations(mockUCase)
-
+			req := httptest.NewRequest("POST", "/logout", nil)
+			req.AddCookie(&http.Cookie{Name: "session_token", Value: session.Token})
 			rec := httptest.NewRecorder()
-			handler := &AuthHandler{
-				AuthUsecase: mockUCase,
-			}
 
-			handler.Logout(rec, req)
+			mux := http.NewServeMux()
+			auth_http.NewAuthHandler(mux, mockUsecase)
+
+			mux.ServeHTTP(rec, req)
 
 			assert.Equal(t, test.status, rec.Code)
-			mockUCase.AssertExpectations(t)
-
-			cookies := rec.Result().Cookies()
-			assert.NotEqual(t, len(cookies) == 0, test.wantCookie)
-
-			if test.wantCookie {
-				var sessionCookie *http.Cookie
-				for _, cookie := range cookies {
-					if cookie.Name == "session_token" {
-						sessionCookie = cookie
-						break
-					}
-				}
-				assert.NotNil(t, sessionCookie)
-				assert.Empty(t, sessionCookie.Value)
-
-				assert.WithinDuration(t, time.Now(), sessionCookie.Expires, 10*time.Second)
-			}
+			mockUsecase.AssertExpectations(t)
 		})
 	}
 }
@@ -325,45 +326,48 @@ func TestRegister(t *testing.T) {
 		getBody              func() []byte
 		setUCaseExpectations func(uCase *mocks.AuthUsecase, session *domain.Session)
 		status               int
-		auth                 string
+		auth                 bool
 		setAuth              func(r *http.Request, uCase *mocks.AuthUsecase, session *domain.Session)
 	}{
-		//{
-		//	name: "GoodCase/Common",
-		//	getBody: func() []byte {
-		//		var user domain.User
-		//		faker.FakeData(&user)
-		//		user.Email = "chgvj@mail.ru"
-		//		jsonBody, _ := json.Marshal(user)
-		//		return jsonBody
-		//	},
-		//	setUCaseExpectations: func(uCase *mocks.AuthUsecase, session *domain.Session) {
-		//		uCase.On("Register", mock.Anything).Return(1, nil)
-		//
-		//		err := faker.FakeData(session)
-		//		assert.NoError(t, err)
-		//		uCase.On("Login", mock.Anything).Return(*session, 1, nil)
-		//	},
-		//	status: http.StatusOK,
-		//},
-		//{
-		//	name: "BadCase/AlreadyRegistered",
-		//	getBody: func() []byte {
-		//		var user domain.User
-		//		faker.FakeData(&user)
-		//		user.Email = "chgvj@mail.ru"
-		//		jsonBody, _ := json.Marshal(user)
-		//		return jsonBody
-		//	},
-		//	setUCaseExpectations: func(uCase *mocks.AuthUsecase, session *domain.Session) {
-		//		uCase.On("Register", mock.Anything).Return(0, domain.ErrAlreadyExists)
-		//
-		//		err := faker.FakeData(session)
-		//		assert.NoError(t, err)
-		//		uCase.On("Login", mock.Anything).Return(*session, 1, nil).Maybe()
-		//	},
-		//	status: http.StatusConflict,
-		//},
+		{
+			name: "GoodCase/Common",
+			getBody: func() []byte {
+				var user domain.User
+				faker.FakeData(&user)
+				user.Email = "chgvj@mail.ru"
+				user.Password = []byte("password")
+				jsonBody, _ := json.Marshal(user)
+				return jsonBody
+			},
+			setUCaseExpectations: func(uCase *mocks.AuthUsecase, session *domain.Session) {
+				uCase.On("Register", mock.Anything).Return(1, nil)
+
+				err := faker.FakeData(session)
+				assert.NoError(t, err)
+				session.ExpiresAt = time.Now().Add(24 * time.Hour)
+				session.UserID = 1
+				uCase.On("Login", mock.Anything).Return(*session, 1, nil)
+			},
+			status: http.StatusOK,
+		},
+		{
+			name: "BadCase/AlreadyRegistered",
+			getBody: func() []byte {
+				var user domain.User
+				faker.FakeData(&user)
+				user.Email = "chgvj@mail.ru"
+				jsonBody, _ := json.Marshal(user)
+				return jsonBody
+			},
+			setUCaseExpectations: func(uCase *mocks.AuthUsecase, session *domain.Session) {
+				uCase.On("Register", mock.Anything).Return(0, domain.ErrAlreadyExists)
+
+				err := faker.FakeData(session)
+				assert.NoError(t, err)
+				uCase.On("Login", mock.Anything).Return(*session, 1, nil).Maybe()
+			},
+			status: http.StatusConflict,
+		},
 		{
 			name: "BadCase/EmptyJson",
 			getBody: func() []byte {
@@ -397,113 +401,122 @@ func TestRegister(t *testing.T) {
 			},
 			status: http.StatusBadRequest,
 		},
-		//{
-		//	name: "BadCase/AlreadyAuthorized",
-		//	getBody: func() []byte {
-		//		var user domain.User
-		//		faker.FakeData(&user)
-		//		user.Email = "chgvj@mail.ru"
-		//		jsonBody, _ := json.Marshal(user)
-		//		return jsonBody
-		//	},
-		//	setUCaseExpectations: func(uCase *mocks.AuthUsecase, session *domain.Session) {
-		//		uCase.On("Register", mock.Anything).Return(0, errors.New("some")).Maybe()
-		//
-		//		err := faker.FakeData(session)
-		//		session.ExpiresAt = time.Now().Add(24 * time.Hour)
-		//		assert.NoError(t, err)
-		//		uCase.On("Login", mock.Anything).Return(*session, 0, nil).Maybe()
-		//	},
-		//	status: http.StatusConflict,
-		//	auth:   userID,
-		//	setAuth: func(r *http.Request, uCase *mocks.AuthUsecase, session *domain.Session) {
-		//		r.AddCookie(&http.Cookie{
-		//			Name:     "session_token",
-		//			Value:    session.Token,
-		//			Expires:  session.ExpiresAt,
-		//			Path:     "/",
-		//			HttpOnly: true,
-		//		})
-		//		uCase.On("IsAuth", mock.Anything).Return(userID, nil)
-		//	},
-		//},
-		//{
-		//	name: "GoodCase/AlreadyAuthorizedExpiredCookie",
-		//	getBody: func() []byte {
-		//		var user domain.User
-		//		faker.FakeData(&user)
-		//		user.Email = "chgvj@mail.ru"
-		//		jsonBody, _ := json.Marshal(user)
-		//		return jsonBody
-		//	},
-		//	setUCaseExpectations: func(uCase *mocks.AuthUsecase, session *domain.Session) {
-		//		uCase.On("Register", mock.Anything).Return(1, nil)
-		//
-		//		err := faker.FakeData(session)
-		//		session.ExpiresAt = time.Now().Add(24 * time.Hour)
-		//		assert.NoError(t, err)
-		//		uCase.On("Login", mock.Anything).Return(*session, 1, nil)
-		//	},
-		//	status: http.StatusOK,
-		//	auth:   userID,
-		//	setAuth: func(r *http.Request, uCase *mocks.AuthUsecase, session *domain.Session) {
-		//		r.AddCookie(&http.Cookie{
-		//			Name:     "session_token",
-		//			Value:    session.Token,
-		//			Expires:  time.Now(),
-		//			Path:     "/",
-		//			HttpOnly: true,
-		//		})
-		//		uCase.On("IsAuth", mock.Anything).Return("", nil).Maybe()
-		//	},
-		//},
-		//{
-		//	name: "GoodCase/AlreadyAuthorizedWrongCookie",
-		//	getBody: func() []byte {
-		//		var user domain.User
-		//		faker.FakeData(&user)
-		//		user.Email = "chgvj@mail.ru"
-		//		jsonBody, _ := json.Marshal(user)
-		//		return jsonBody
-		//	},
-		//	setUCaseExpectations: func(uCase *mocks.AuthUsecase, session *domain.Session) {
-		//		uCase.On("Register", mock.Anything).Return(1, nil)
-		//
-		//		err := faker.FakeData(session)
-		//		session.ExpiresAt = time.Now().Add(24 * time.Hour)
-		//		assert.NoError(t, err)
-		//		uCase.On("Login", mock.Anything).Return(*session, 1, nil)
-		//	},
-		//	status: http.StatusOK,
-		//	auth:   userID,
-		//	setAuth: func(r *http.Request, uCase *mocks.AuthUsecase, session *domain.Session) {
-		//		r.AddCookie(&http.Cookie{
-		//			Name:     "fevk",
-		//			Value:    session.Token,
-		//			Expires:  session.ExpiresAt,
-		//			Path:     "/",
-		//			HttpOnly: true,
-		//		})
-		//		uCase.On("IsAuth", mock.Anything).Return("", nil).Maybe()
-		//	},
-		//},
+		{
+			name: "BadCase/AlreadyAuthorized",
+			getBody: func() []byte {
+				var user domain.User
+				faker.FakeData(&user)
+				user.Email = "chgvj@mail.ru"
+				jsonBody, _ := json.Marshal(user)
+				return jsonBody
+			},
+			setUCaseExpectations: func(uCase *mocks.AuthUsecase, session *domain.Session) {
+				uCase.On("Register", mock.Anything).Return(0, errors.New("some")).Maybe()
+				err := faker.FakeData(session)
+
+				session.ExpiresAt = time.Now().Add(24 * time.Hour)
+				session.Role = domain.Usr
+
+				assert.NoError(t, err)
+				uCase.On("Login", mock.Anything).Return(*session, 0, nil).Maybe()
+			},
+			status: http.StatusConflict,
+			auth:   true,
+			setAuth: func(r *http.Request, uCase *mocks.AuthUsecase, session *domain.Session) {
+				r.AddCookie(&http.Cookie{
+					Name:     "session_token",
+					Value:    session.Token,
+					Expires:  session.ExpiresAt,
+					Path:     "/",
+					HttpOnly: true,
+				})
+				uCase.On("RetrieveSessionContext", mock.Anything).
+					Return(domain.SessionContext{
+						UserID: session.UserID,
+						Role:   session.Role}, nil)
+			},
+		},
+		{
+			name: "GoodCase/AlreadyAuthorizedExpiredCookie",
+			getBody: func() []byte {
+				var user domain.User
+				faker.FakeData(&user)
+				user.Email = "chgvj@mail.ru"
+				jsonBody, _ := json.Marshal(user)
+				return jsonBody
+			},
+			setUCaseExpectations: func(uCase *mocks.AuthUsecase, session *domain.Session) {
+				uCase.On("Register", mock.Anything).Return(1, nil)
+				err := faker.FakeData(session)
+
+				session.ExpiresAt = time.Now().Add(24 * time.Hour)
+				session.Role = domain.Usr
+
+				assert.NoError(t, err)
+				uCase.On("Login", mock.Anything).Return(*session, 1, nil)
+			},
+			status: http.StatusOK,
+			auth:   true,
+			setAuth: func(r *http.Request, uCase *mocks.AuthUsecase, session *domain.Session) {
+				r.AddCookie(&http.Cookie{
+					Name:     "session_token",
+					Value:    session.Token,
+					Expires:  time.Now(),
+					Path:     "/",
+					HttpOnly: true,
+				})
+				uCase.On("RetrieveSessionContext", mock.Anything).
+					Return(domain.SessionContext{
+						UserID: session.UserID,
+						Role:   session.Role}, domain.ErrUnauthorized).Maybe()
+			},
+		},
+		{
+			name: "GoodCase/AlreadyAuthorizedWrongCookie",
+			getBody: func() []byte {
+				var user domain.User
+				faker.FakeData(&user)
+				user.Email = "chgvj@mail.ru"
+				jsonBody, _ := json.Marshal(user)
+				return jsonBody
+			},
+			setUCaseExpectations: func(uCase *mocks.AuthUsecase, session *domain.Session) {
+				uCase.On("Register", mock.Anything).Return(1, nil)
+
+				err := faker.FakeData(session)
+				session.ExpiresAt = time.Now().Add(24 * time.Hour)
+				assert.NoError(t, err)
+				uCase.On("Login", mock.Anything).Return(*session, 1, nil)
+			},
+			status: http.StatusOK,
+			auth:   true,
+			setAuth: func(r *http.Request, uCase *mocks.AuthUsecase, session *domain.Session) {
+				r.AddCookie(&http.Cookie{
+					Name:     "fevk",
+					Value:    session.Token,
+					Expires:  session.ExpiresAt,
+					Path:     "/",
+					HttpOnly: true,
+				})
+				uCase.On("RetrieveSessionContext", mock.Anything).Return(nil, errors.New("some error")).Maybe()
+			},
+		},
 	}
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			//t.Parallel()
-
 			req, err := http.NewRequest("POST", "/api/v1/auth/register", bytes.NewReader(test.getBody()))
 			assert.NoError(t, err)
 
 			mockUCase := new(mocks.AuthUsecase)
 			var mockSession domain.Session
 			test.setUCaseExpectations(mockUCase, &mockSession)
-			if test.auth != "" {
+			if test.auth {
 				test.setAuth(req, mockUCase, &mockSession)
 			}
+
 			rec := httptest.NewRecorder()
-			handler := &AuthHandler{
+			handler := &auth_http.AuthHandler{
 				AuthUsecase: mockUCase,
 			}
 

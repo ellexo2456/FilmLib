@@ -55,7 +55,7 @@ func StartServer() {
 
 	auth_http.NewAuthHandler(authMux, au)
 	actors_http.NewActorsHandler(apiMux, acu)
-	films_http.NewFilmHandler(apiMux, fu)
+	films_http.NewFilmsHandler(apiMux, fu)
 	mux.HandleFunc("/swagger/*", httpSwagger.WrapHandler)
 
 	mw := middleware.NewAuth(au)

@@ -13,7 +13,7 @@ type FilmsHandler struct {
 	FilmsUsecase domain.FilmsUsecase
 }
 
-func NewFilmHandler(mux *http.ServeMux, fu domain.FilmsUsecase) {
+func NewFilmsHandler(mux *http.ServeMux, fu domain.FilmsUsecase) {
 	handler := &FilmsHandler{
 		FilmsUsecase: fu,
 	}
@@ -52,7 +52,6 @@ func (h *FilmsHandler) AddFilm(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var film domain.Film
-
 	err := json.NewDecoder(r.Body).Decode(&film)
 	if err != nil {
 		domain.WriteError(w, err.Error(), http.StatusBadRequest)
@@ -114,6 +113,7 @@ func (h *FilmsHandler) GetFilms(w http.ResponseWriter, r *http.Request) {
 }
 
 // Search godoc
+//
 //	@Summary		Searches films
 //	@Description	Searches films by parts of its titles and parts of films names.
 //	@Tags			Films

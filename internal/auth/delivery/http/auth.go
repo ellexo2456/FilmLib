@@ -103,6 +103,13 @@ func (a *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 //	@Failure		500	{object}	object{err=string}
 //	@Router			/api/v1/auth/logout [post]
 func (a *AuthHandler) Logout(w http.ResponseWriter, r *http.Request) {
+	auth, err := a.auth(r)
+	if auth != true {
+		domain.WriteError(w, "you must be authorised", domain.GetStatusCode(err))
+		logs.LogError(logs.Logger, "auth_http", "Register.auth", err, "user isn`t authorised")
+		return
+	}
+
 	c, err := r.Cookie("session_token")
 	sessionToken := c.Value
 	logs.Logger.Debug("Logout: session token:", c)
@@ -152,7 +159,7 @@ func (a *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 		logs.LogError(logs.Logger, "auth_http", "Register.decode", err, "Failed to decode json from body")
 		return
 	}
-	//logs.Logger.Debug("Register user:", user)
+	logs.Logger.Debug("Register user:", user)
 	defer domain.CloseAndAlert(r.Body, "auth/http", "Register")
 
 	user.Email = strings.TrimSpace(user.Email)

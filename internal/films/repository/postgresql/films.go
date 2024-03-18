@@ -26,8 +26,8 @@ const searchQuery = `
 	FROM film f
          LEFT JOIN film_actor fa ON fa.film_id = f.id
          LEFT JOIN actor a ON a.id = fa.actor_id
-	WHERE (f.title ILIKE '%hero%'
-    OR a.name ILIKE '%hero%')
+	WHERE (f.title ILIKE $1
+    OR a.name ILIKE $1)
 `
 
 const deleteQuery = `

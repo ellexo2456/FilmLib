@@ -16,7 +16,7 @@ func NewActorsUsecase(ar domain.ActorsRepository) domain.ActorsUsecase {
 }
 
 func (u *actorsUsecase) Add(actor domain.Actor) (int, error) {
-	if actor.Name == "" || actor.Sex != "" || !actor.Birthdate.Valid {
+	if actor.Name == "" || actor.Sex == "" || !actor.Birthdate.Valid {
 		return 0, domain.ErrBadRequest
 	}
 

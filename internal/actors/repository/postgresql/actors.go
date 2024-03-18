@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgconn"
 	"math"
 
 	"github.com/ellexo2456/FilmLib/internal/domain"
@@ -73,6 +74,12 @@ func (r *actorsPostgresqlRepository) Insert(actor domain.Actor) (int, error) {
 
 	if err != nil {
 		logs.LogError(logs.Logger, "actors/postgres", "Insert", err, err.Error())
+
+		var pgErr *pgconn.PgError
+		if errors.As(err, &pgErr) && pgErr.Code == domain.BirthdateOutOfRangeErrCode {
+			return 0, domain.ErrOutOfRange
+		}
+
 		return 0, err
 	}
 	return id, nil
@@ -108,6 +115,12 @@ func (r *actorsPostgresqlRepository) Update(actor domain.Actor) (domain.Actor, e
 	}
 	if err != nil {
 		logs.LogError(logs.Logger, "actors/postgres", "Update", err, err.Error())
+
+		var pgErr *pgconn.PgError
+		if errors.As(err, &pgErr) && pgErr.Code == domain.BirthdateOutOfRangeErrCode {
+			return domain.Actor{}, domain.ErrOutOfRange
+		}
+
 		return domain.Actor{}, err
 	}
 

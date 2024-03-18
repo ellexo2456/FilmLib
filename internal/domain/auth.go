@@ -15,6 +15,11 @@ type Key string
 
 const SessionContextKey Key = "SessionContextKey"
 
+type SessionContext struct {
+	UserID int
+	Role   Role
+}
+
 type Credentials struct {
 	Password []byte `json:"password"`
 	Email    string `json:"email"`
@@ -35,11 +40,6 @@ type Session struct {
 	ExpiresAt time.Time `json:"expiresAt"`
 	UserID    int       `json:"-"`
 	Role      Role      `json:"-"`
-}
-
-type SessionContext struct {
-	UserID int
-	Role   Role
 }
 
 type AuthUsecase interface {
