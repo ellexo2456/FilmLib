@@ -28,7 +28,6 @@ import (
 	logs "github.com/ellexo2456/FilmLib/internal/logger"
 )
 
-// 61 73 76 31
 func StartServer() {
 	err := godotenv.Load()
 
@@ -58,14 +57,15 @@ func StartServer() {
 	films_http.NewFilmsHandler(apiMux, fu)
 	mux.HandleFunc("/swagger/*", httpSwagger.WrapHandler)
 
-	mw := middleware.NewAuth(au)
+	amw := middleware.NewAuth(au)
+	logger := middleware.NewLogger(logs.Logger)
 
 	mux.Handle("/api/v1/auth/", http.StripPrefix("/api/v1/auth", authMux))
-	mux.Handle("/api/v1/", http.StripPrefix("/api/v1", mw.IsAuth(apiMux)))
+	mux.Handle("/api/v1/", http.StripPrefix("/api/v1", amw.IsAuth(apiMux)))
 
 	port := ":" + os.Getenv("HTTP_SERVER_PORT")
 	logs.Logger.Info("start listening on port" + port)
-	err = http.ListenAndServe(port, mux)
+	err = http.ListenAndServe(port, logger.AccessLogMiddleware(mux))
 	if err != nil {
 		logs.LogFatal(logs.Logger, "app", "main", err, err.Error())
 	}
