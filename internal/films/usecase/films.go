@@ -51,6 +51,7 @@ func (u *filmsUsecase) Search(searchStr string) ([]domain.Film, error) {
 	films, err := u.filmsRepo.Search(searchStr)
 	if err != nil {
 		logs.LogError(logs.Logger, "films/usecase", "Search", err, err.Error())
+		return nil, err
 	}
 	logs.Logger.Debug("films/usecase Search films:", films)
 
@@ -167,15 +168,15 @@ func descRating() func(a, b domain.Film) int {
 }
 
 func isEmpty(film domain.Film) bool {
-	if film.ID == 0 || film.Rating == 0 {
-		return false
+	if film.Rating == 0 {
+		return true
 	}
 	if !film.ReleaseDate.Valid || len(film.Actors) == 0 {
-		return false
+		return true
 	}
 	if film.Description == "" || film.Title == "" {
-		return false
+		return true
 	}
 
-	return true
+	return false
 }
