@@ -5,6 +5,8 @@ import (
 	"net/http"
 )
 
+const DateOutOfRangeErrCode = "23514"
+
 var (
 	ErrInternalServerError = errors.New("internal Server Error")
 	ErrNotFound            = errors.New("requested Item is not found")

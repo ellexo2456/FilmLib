@@ -6,6 +6,7 @@ import (
 	"github.com/ellexo2456/FilmLib/internal/domain"
 	logs "github.com/ellexo2456/FilmLib/internal/logger"
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgconn"
 	"math"
 )
 
@@ -73,7 +74,13 @@ func (r *filmsPostgresqlRepository) Insert(film domain.Film) (int, error) {
 	err = row.Scan(
 		&id,
 	)
+
 	if err != nil {
+		var pgErr *pgconn.PgError
+		if errors.As(err, &pgErr) && pgErr.Code == domain.DateOutOfRangeErrCode {
+			return 0, domain.ErrOutOfRange
+		}
+
 		logs.LogError(logs.Logger, "films/postgres", "Insert", err, err.Error())
 		return 0, err
 	}

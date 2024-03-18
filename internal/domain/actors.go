@@ -9,8 +9,6 @@ const (
 	F     = "F"
 )
 
-const BirthdateOutOfRangeErrCode = "23514"
-
 type Actor struct {
 	ID        int         `json:"id"`
 	Name      string      `json:"name"`

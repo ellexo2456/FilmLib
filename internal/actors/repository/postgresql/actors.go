@@ -76,7 +76,7 @@ func (r *actorsPostgresqlRepository) Insert(actor domain.Actor) (int, error) {
 		logs.LogError(logs.Logger, "actors/postgres", "Insert", err, err.Error())
 
 		var pgErr *pgconn.PgError
-		if errors.As(err, &pgErr) && pgErr.Code == domain.BirthdateOutOfRangeErrCode {
+		if errors.As(err, &pgErr) && pgErr.Code == domain.DateOutOfRangeErrCode {
 			return 0, domain.ErrOutOfRange
 		}
 
@@ -117,7 +117,7 @@ func (r *actorsPostgresqlRepository) Update(actor domain.Actor) (domain.Actor, e
 		logs.LogError(logs.Logger, "actors/postgres", "Update", err, err.Error())
 
 		var pgErr *pgconn.PgError
-		if errors.As(err, &pgErr) && pgErr.Code == domain.BirthdateOutOfRangeErrCode {
+		if errors.As(err, &pgErr) && pgErr.Code == domain.DateOutOfRangeErrCode {
 			return domain.Actor{}, domain.ErrOutOfRange
 		}
 
