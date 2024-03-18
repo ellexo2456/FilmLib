@@ -1,0 +1,656 @@
+basePath: /
+definitions:
+  domain.ActorToAdd:
+    properties:
+      birthdate:
+        format: date
+        type: string
+      name:
+        type: string
+      sex:
+        $ref: '#/definitions/domain.Sex'
+    type: object
+  domain.ActorToFilmAdd:
+    properties:
+      id:
+        type: integer
+    type: object
+  domain.ActorWithFilms:
+    properties:
+      birthdate:
+        format: date
+        type: string
+      films:
+        items:
+          $ref: '#/definitions/domain.FilmWithoutActors'
+        type: array
+      id:
+        type: integer
+      name:
+        type: string
+      sex:
+        $ref: '#/definitions/domain.Sex'
+    type: object
+  domain.ActorWithoutFilms:
+    properties:
+      birthdate:
+        format: date
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      sex:
+        $ref: '#/definitions/domain.Sex'
+    type: object
+  domain.Credentials:
+    properties:
+      email:
+        type: string
+      password:
+        items:
+          type: integer
+        type: array
+    type: object
+  domain.FilmToAdd:
+    properties:
+      actors:
+        items:
+          $ref: '#/definitions/domain.ActorToFilmAdd'
+        type: array
+      description:
+        type: string
+      rating:
+        type: number
+      releaseDate:
+        format: date
+        type: string
+      title:
+        type: string
+    type: object
+  domain.FilmWithoutActors:
+    properties:
+      description:
+        type: string
+      id:
+        type: integer
+      rating:
+        type: number
+      releaseDate:
+        format: date
+        type: string
+      title:
+        type: string
+    type: object
+  domain.Sex:
+    enum:
+    - M
+    type: string
+    x-enum-varnames:
+    - M
+host: localhost:3000
+info:
+  contact:
+    email: ax.chinaev@yandex.ru
+    name: Alex Chinaev
+    url: https://vk.com/l.chinaev
+  description: API of the FilmLib project
+  license:
+    name: AS IS (NO WARRANTY)
+  title: FilmLib API
+  version: "1.0"
+paths:
+  /api/v1/actors:
+    get:
+      description: Gets all actors with related films.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            properties:
+              body:
+                properties:
+                  actors:
+                    items:
+                      $ref: '#/definitions/domain.ActorWithFilms'
+                    type: array
+                type: object
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            properties:
+              err:
+                type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            properties:
+              err:
+                type: string
+            type: object
+      summary: Gets actors.
+      tags:
+      - Actors
+    post:
+      description: Adds a new actor with the provided data.
+      parameters:
+      - description: actor to add
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/domain.ActorToAdd'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            properties:
+              body:
+                properties:
+                  id:
+                    type: integer
+                type: object
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            properties:
+              err:
+                type: string
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            properties:
+              err:
+                type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            properties:
+              err:
+                type: string
+            type: object
+      summary: Adds a new actor.
+      tags:
+      - Actors
+    put:
+      description: Modify an actor by id and retrieves a new actor.
+      parameters:
+      - description: Actor to modify
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/domain.ActorWithoutFilms'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            properties:
+              body:
+                properties:
+                  actors:
+                    $ref: '#/definitions/domain.ActorWithoutFilms'
+                type: object
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            properties:
+              err:
+                type: string
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            properties:
+              err:
+                type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            properties:
+              err:
+                type: string
+            type: object
+      summary: Modify an actor.
+      tags:
+      - Actors
+  /api/v1/actors/{id}:
+    delete:
+      description: Deletes an actor by id with all its relations with films.
+      parameters:
+      - description: Actor id
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            properties:
+              err:
+                type: string
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            properties:
+              err:
+                type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            properties:
+              err:
+                type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            properties:
+              err:
+                type: string
+            type: object
+      summary: Deletes an actor.
+      tags:
+      - Actors
+  /api/v1/auth/login:
+    post:
+      consumes:
+      - application/json
+      description: create user session and put it into cookie
+      parameters:
+      - description: user credentials
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/domain.Credentials'
+      responses:
+        "200":
+          description: OK
+          schema:
+            properties:
+              body:
+                properties:
+                  id:
+                    type: integer
+                type: object
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            properties:
+              err:
+                type: string
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            properties:
+              err:
+                type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            properties:
+              err:
+                type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            properties:
+              err:
+                type: string
+            type: object
+      summary: login user
+      tags:
+      - Auth
+  /api/v1/auth/logout:
+    post:
+      description: delete current session and nullify cookie
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            properties:
+              err:
+                type: string
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            properties:
+              err:
+                type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            properties:
+              err:
+                type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            properties:
+              err:
+                type: string
+            type: object
+      summary: logout user
+      tags:
+      - Auth
+  /api/v1/auth/register:
+    post:
+      consumes:
+      - application/json
+      description: add new user to db and return it id
+      parameters:
+      - description: user credentials
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/domain.Credentials'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            properties:
+              body:
+                properties:
+                  id:
+                    type: integer
+                type: object
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            properties:
+              err:
+                type: string
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            properties:
+              err:
+                type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            properties:
+              err:
+                type: string
+            type: object
+      summary: register user
+      tags:
+      - Auth
+  /api/v1/films:
+    get:
+      description: 'Gets all films descending sorted by rating (by default). Only
+        one sort can be applied at a time. If several are applied, the priority is
+        as follows: title, releaseDate, rating (by default).'
+      parameters:
+      - description: Direction of title sort. Sorting wont be applied if param isnt
+          specified.
+        enum:
+        - Asc
+        - Desc
+        in: query
+        name: sortTitle
+        type: string
+      - description: Direction of release date sort. Sorting wont be applied if param
+          isnt specified.
+        enum:
+        - Asc
+        - Desc
+        in: query
+        name: sortReleaseDate
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            properties:
+              body:
+                properties:
+                  films:
+                    items:
+                      $ref: '#/definitions/domain.FilmWithoutActors'
+                    type: array
+                type: object
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            properties:
+              err:
+                type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            properties:
+              err:
+                type: string
+            type: object
+      summary: Gets films.
+      tags:
+      - Films
+    post:
+      description: Adds a new film with provided data.
+      parameters:
+      - description: film to add
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/domain.FilmToAdd'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            properties:
+              body:
+                properties:
+                  id:
+                    type: integer
+                type: object
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            properties:
+              err:
+                type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            properties:
+              err:
+                type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            properties:
+              err:
+                type: string
+            type: object
+      summary: Adds a new film.
+      tags:
+      - Films
+    put:
+      description: Modify a film by id and retrieves a new film.
+      parameters:
+      - description: Film to modify
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/domain.FilmWithoutActors'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            properties:
+              body:
+                properties:
+                  film:
+                    $ref: '#/definitions/domain.FilmWithoutActors'
+                type: object
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            properties:
+              err:
+                type: string
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            properties:
+              err:
+                type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            properties:
+              err:
+                type: string
+            type: object
+      summary: Modify a film.
+      tags:
+      - Films
+  /api/v1/films/{id}:
+    delete:
+      description: Deletes a film by id with all its relations with actors.
+      parameters:
+      - description: Film id
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            properties:
+              err:
+                type: string
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            properties:
+              err:
+                type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            properties:
+              err:
+                type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            properties:
+              err:
+                type: string
+            type: object
+      summary: Deletes a film.
+      tags:
+      - Films
+  /api/v1/films/search:
+    get:
+      description: Searches films by parts of its titles and parts of films names.
+      parameters:
+      - description: The string to be searched for
+        in: query
+        name: searchStr
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            properties:
+              body:
+                properties:
+                  films:
+                    items:
+                      $ref: '#/definitions/domain.FilmWithoutActors'
+                    type: array
+                type: object
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            properties:
+              err:
+                type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            properties:
+              err:
+                type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            properties:
+              err:
+                type: string
+            type: object
+      summary: Searches films
+      tags:
+      - Films
+schemes:
+- http
+swagger: "2.0"
